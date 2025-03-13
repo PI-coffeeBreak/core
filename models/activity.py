@@ -1,12 +1,5 @@
 from dependencies.database import Base
-from sqlalchemy import  Column, \
-                        Integer, \
-                        String, \
-                        Boolean, \
-                        Time, \
-                        ForeignKey
-from sqlalchemy_imageattach.entity import Image, image_attachment
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, String, Boolean, Time, ForeignKey
 
 class Activity(Base):
     __tablename__ = "activities"
@@ -14,24 +7,34 @@ class Activity(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, unique=True, index=True, nullable=False)
     description = Column(String, nullable=False)
-    image = image_attachment("ActivityImage")
+    image = Column(String, nullable=True)
     date = Column(Time, nullable=True)
     duration = Column(Integer, nullable=True)
+    type = Column(String, nullable=True)
 
-class ActivityImage(Base, Image):
-    __tablename__ = "activity_images"
-
-    activity_id = Column(Integer, ForeignKey("activities.id"), primary_key=True)
-    activity = relationship("Activity")
+    __mapper_args__ = {
+        "polymorphic_identity": "activity",
+        "polymorphic_on": type,
+    }
 
 class Talk(Activity):
     __tablename__ = "talks"
+    id = Column(Integer, ForeignKey("activities.id"), primary_key=True)
 
     speaker = Column(String, nullable=False)
     topic = Column(String, nullable=False)
 
+    __mapper_args__ = {
+        "polymorphic_identity": "talk",
+    }
+
 class Workshop(Activity):
     __tablename__ = "workshops"
+    id = Column(Integer, ForeignKey("activities.id"), primary_key=True)
 
     facilitator = Column(String, nullable=False)
     topic = Column(String, nullable=False)
+
+    __mapper_args__ = {
+        "polymorphic_identity": "workshop",
+    }
