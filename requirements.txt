@@ -9,6 +9,8 @@ anyio=4.8.0=pypi_0
 bzip2=1.0.8=h5eee18b_6
 ca-certificates=2025.2.25=h06a4308_0
 click=8.1.8=pypi_0
+dnspython=2.7.0=pypi_0
+email-validator=2.2.0=pypi_0
 expat=2.6.4=h6a678d5_0
 fastapi=0.115.11=pypi_0
 greenlet=3.1.1=py313h6a678d5_0
