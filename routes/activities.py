@@ -13,7 +13,7 @@ def get_activities(db: Session = Depends(get_db)):
 
 @router.post("/", response_model=ActivitySchema)
 def create_activity(activity: ActivityCreate, db: Session = Depends(get_db)):
-    new_activity = Activity(activity)
+    new_activity = Activity(**activity.dict())
     db.add(new_activity)
     db.commit()
     db.refresh(new_activity)

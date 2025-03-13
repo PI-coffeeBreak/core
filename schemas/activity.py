@@ -2,8 +2,9 @@ from pydantic import BaseModel
 from typing import Optional, List
 
 class ActivityBase(BaseModel):
-    title: str
+    name: str
     description: str
+    type: str
 
 class ActivityCreate(ActivityBase):
     pass
