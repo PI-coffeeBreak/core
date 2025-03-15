@@ -13,7 +13,7 @@ def get_users(db: Session = Depends(get_db)):
 
 @router.post("/", response_model=UserSchema)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
-    new_user = User(user)
+    new_user = User(**user.model_dump())
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
