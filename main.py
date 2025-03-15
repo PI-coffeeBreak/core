@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+
 from routes import users, activities, activity_types
 from dependencies.database import engine, Base
 
@@ -12,3 +13,4 @@ app.include_router(activities.router, prefix="/activities", tags=["Activities"])
 app.include_router(activity_types.router, prefix="/activity_types", tags=["Activity Types"])
 
 # Run with: uvicorn main:app --reload
+# load env file: --env-file <env_file>
