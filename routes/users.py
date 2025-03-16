@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from dependencies.database import get_db
 from models.user import User
 from schemas.user import User as UserSchema, UserCreate
+from dependencies.auth import get_current_user
 
 router = APIRouter()
 
@@ -18,3 +19,7 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
     return new_user
+
+@router.get("/me")
+async def read_users_me(current_user: dict = Depends(get_current_user)):
+    return current_user

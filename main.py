@@ -1,9 +1,23 @@
 from fastapi import FastAPI
+import logging
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request
+from starlette.responses import Response
 
-from routes import users, activities, activity_types
+from routes import users, activities, activity_types, auth
 from dependencies.database import engine, Base
 
 app = FastAPI()
+
+logger = logging.getLogger("coffeebreak")
+
+class CoffeeBreakLoggerMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        logger.debug(f"{request.method} {request.url} - {response.status_code}")
+        return response
+
+app.add_middleware(CoffeeBreakLoggerMiddleware)
 
 Base.metadata.create_all(bind=engine)
 
@@ -11,6 +25,7 @@ Base.metadata.create_all(bind=engine)
 app.include_router(users.router, prefix="/users", tags=["Users"])
 app.include_router(activities.router, prefix="/activities", tags=["Activities"])
 app.include_router(activity_types.router, prefix="/activity_types", tags=["Activity Types"])
+app.include_router(auth.router, tags=["Auth"])
 
-# Run with: uvicorn main:app --reload
+# Run with: uvicorn main:app --reload --log-config logging_config.json
 # load env file: --env-file <env_file>
