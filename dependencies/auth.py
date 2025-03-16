@@ -8,10 +8,10 @@ import sys
 logger = logging.getLogger("coffeebreak.core")
 
 # Keycloak configuration
-KEYCLOAK_URL = os.getenv("KEYCLOAK_URL", "https://localhost:8443")
-KEYCLOAK_REALM = os.getenv("KEYCLOAK_REALM", "coffeebreak")
-KEYCLOAK_CLIENT_ID = os.getenv("KEYCLOAK_CLIENT_ID", "fastapi-client")
-KEYCLOAK_CLIENT_SECRET = os.getenv("KEYCLOAK_CLIENT_SECRET", "your-client-secret")
+KEYCLOAK_URL = os.getenv("KEYCLOAK_URL")
+KEYCLOAK_REALM = os.getenv("KEYCLOAK_REALM")
+KEYCLOAK_CLIENT_ID = os.getenv("KEYCLOAK_CLIENT_ID")
+KEYCLOAK_CLIENT_SECRET = os.getenv("KEYCLOAK_CLIENT_SECRET")
 
 if not all([KEYCLOAK_URL, KEYCLOAK_REALM, KEYCLOAK_CLIENT_ID, KEYCLOAK_CLIENT_SECRET]):
     logger.error("One or more Keycloak environment variables are not set. Exiting program.")
