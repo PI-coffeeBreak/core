@@ -12,5 +12,5 @@ router = APIRouter()
 @router.post("/token")
 async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
     token = keycloak_openid.token(form_data.username, form_data.password)
-    logger.debug(f"Token: {token}")
+    logger.debug(f"User {form_data.username} logged in")
     return token
