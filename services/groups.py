@@ -53,6 +53,4 @@ def get_users_in_group(group_name: str):
         logger.error(f"Failed to get users in group: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to get users in group")
 
-def get_user_by_id(user_id: str):
-    """Retorna informações de um usuário específico no Keycloak"""
-    
+
