@@ -3,9 +3,20 @@ from models.message import Message, RecipientType
 from schemas.notification import NotificationRequest
 
 class MessageBus:
+    _instance = None
+
+    def __new__(cls, db: Session):
+        if cls._instance is None:
+            cls._instance = super(MessageBus, cls).__new__(cls)
+            cls._instance._initialized = False
+        return cls._instance
+
     def __init__(self, db: Session):
+        if self._initialized:
+            return
         self.db = db
         self.handlers = {}
+        self._initialized = True
 
     def register_message_handler(self, type: str, callback):
         if type not in self.handlers:
