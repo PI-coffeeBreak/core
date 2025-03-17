@@ -1,0 +1,61 @@
+{
+    "version": 1,
+    "disable_existing_loggers": false,
+    "formatters": {
+      "colored": {
+        "()": "colorlog.ColoredFormatter",
+        "format": "%(asctime)s - %(log_color)s%(levelname)s%(reset)s - %(name)s - %(message)s",
+        "log_colors": {
+          "DEBUG": "cyan",
+          "INFO": "green",
+          "WARNING": "yellow",
+          "ERROR": "red",
+          "CRITICAL": "bold_red"
+        }
+      },
+      "standard": {
+        "format": "%(asctime)s - %(levelname)s - %(name)s - %(message)s"
+      }
+    },
+    "handlers": {
+      "console": {
+        "class": "logging.StreamHandler",
+        "formatter": "colored",
+        "level": "DEBUG"
+      },
+      "file": {
+        "class": "logging.FileHandler",
+        "formatter": "standard",
+        "filename": "app.log",
+        "level": "INFO"
+      }
+    },
+    "loggers": {
+      "": {
+        "handlers": ["console", "file"],
+        "level": "INFO",
+        "propagate": false
+      },
+      "uvicorn": {
+        "handlers": ["console", "file"],
+        "level": "INFO",
+        "propagate": false
+      },
+      "uvicorn.error": {
+        "handlers": ["console", "file"],
+        "level": "INFO",
+        "propagate": false
+      },
+      "uvicorn.access": {
+        "handlers": ["console", "file"],
+        "level": "INFO",
+        "propagate": false
+      },
+      "coffeebreak": {
+        "handlers": ["console", "file"],
+        "level": "DEBUG",
+        "propagate": false
+      }
+    }
+  }
+  
