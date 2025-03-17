@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routes import users, activities, activity_types, messages
+from routes import users, activities, activity_types
 from dependencies.database import engine, Base
 
 app = FastAPI()
