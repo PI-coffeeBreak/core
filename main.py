@@ -45,11 +45,12 @@ app = FastAPI(lifespan=lifespan)
 # Include routers
 app.include_router(users.router, prefix="/users", tags=["Users"])
 app.include_router(activities.router, prefix="/activities", tags=["Activities"])
-app.include_router(activity_types.router, prefix="/activity_types", tags=["Activity Types"])
+app.include_router(activity_types.router, prefix="/activity-types", tags=["Activity Types"])
 app.include_router(auth.router, tags=["Auth"])
 
 # Include UI routers
 app.include_router(main_menu.router, prefix="/ui/menu", tags=["Main Menu"])
+app.include_router(main_menu.router, prefix="/ui/plugin-config", tags=["Plugin Settings"])
 
 # Run with: uvicorn main:app --reload --log-config logging_config.json
 # load env file: --env-file <env_file>
