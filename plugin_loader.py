@@ -19,10 +19,12 @@ def plugin_loader(plugins_dir, app: FastAPI):
                 module = importlib.util.module_from_spec(spec)
                 spec.loader.exec_module(module)
                 if hasattr(module, 'REGISTER'):
+                    if not hasattr(module, 'UNREGISTER'):
+                        logger.warning(f"Plugin {filename} does not have a UNREGISTER method")
                     module.REGISTER()
                     if hasattr(module, 'router'):
-                        router = module.router.get_router()
-                        if router and isinstance(router, Router):
+                        if module.router and isinstance(module.router, Router):
+                            router = module.router.get_router()
                             prefix = f"/{filename}"
                             tag = f"{filename}".capitalize()
                             logger.info(
