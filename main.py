@@ -4,6 +4,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
 from contextlib import asynccontextmanager
+from plugin_loader import plugin_loader
 
 from routes import users, activities, activity_types, auth
 from dependencies.database import engine, Base
@@ -14,6 +15,8 @@ from schemas.ui.main_menu import MainMenu, MenuOption
 app = FastAPI()
 
 logger = logging.getLogger("coffeebreak")
+
+plugin_loader('plugins', app)
 
 class CoffeeBreakLoggerMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
