@@ -36,7 +36,3 @@ async def delete_plugin_setting_by_title(plugin_title: str) -> PluginSetting:
     if result.deleted_count == 0:
         raise HTTPException(status_code=500, detail="Failed to delete plugin setting")
     return PluginSetting(**plugin_setting)
-
-async def list_plugin_settings() -> List[PluginSetting]:
-    plugin_settings = await plugin_settings_collection.find().to_list(length=100)
-    return [PluginSetting(**plugin_setting) for plugin_setting in plugin_settings]
