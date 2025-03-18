@@ -3,9 +3,12 @@ import logging
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
+from contextlib import asynccontextmanager
 
 from routes import users, activities, activity_types, auth, main_menu
 from dependencies.database import engine, Base
+from dependencies.mongodb import db
+from schemas.ui.main_menu import MainMenu, MenuOption
 
 app = FastAPI()
 
@@ -20,6 +23,23 @@ class CoffeeBreakLoggerMiddleware(BaseHTTPMiddleware):
 app.add_middleware(CoffeeBreakLoggerMiddleware)
 
 Base.metadata.create_all(bind=engine)
+
+# Create default main menu if it does not exist
+async def create_default_main_menu():
+    main_menu_collection = db['main_menu_collection']
+    if await main_menu_collection.count_documents({}) == 0:
+        default_main_menu = MainMenu(options=[
+            MenuOption(icon="home", label="Home", href="https://example.com/home"),
+            MenuOption(icon="profile", label="Profile", href="https://example.com/profile"),
+        ])
+        await main_menu_collection.insert_one(default_main_menu.model_dump())
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await create_default_main_menu()
+    yield
+
+app = FastAPI(lifespan=lifespan)
 
 # Include routers
 app.include_router(users.router, prefix="/users", tags=["Users"])
