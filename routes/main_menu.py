@@ -36,3 +36,14 @@ async def update_menu_option(option_index: int, option: MenuOption):
 @router.delete("/option/{option_index}", response_model=MainMenu, dependencies=[Depends(check_role(["customization"]))])
 async def delete_menu_option(option_index: int):
     return await remove_menu_option(option_index)
+
+@router.put("/options", response_model=MainMenu, dependencies=[Depends(check_role(["customization"]))])
+async def update_menu_options(options: List[MenuOption]):
+    main_menu = await main_menu_collection.find_one()
+    if not main_menu:
+        raise HTTPException(status_code=404, detail="Main menu not found")
+    main_menu['options'] = [option.dict() for option in options]
+    result = await main_menu_collection.update_one({}, {"$set": main_menu})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=500, detail="Failed to update menu options")
+    return main_menu
