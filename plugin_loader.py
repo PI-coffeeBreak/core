@@ -6,6 +6,7 @@ from utils.api import Router
 
 logger = logging.getLogger("coffeebreak.core")
 
+loaded_plugins = {}
 
 def plugin_loader(plugins_dir, app: FastAPI):
     for filename in os.listdir(plugins_dir):
@@ -17,11 +18,28 @@ def plugin_loader(plugins_dir, app: FastAPI):
                     filename, init_file)
                 module = importlib.util.module_from_spec(spec)
                 spec.loader.exec_module(module)
-                if hasattr(module, 'router'):
-                    router = module.router.get_router()
-                    if router and isinstance(router, Router):
-                        prefix = f"/{filename}"
-                        tag = f"{filename}".capitalize()
-                        logger.info(
-                            f"Loading plugin {filename} with prefix {prefix} and tag {tag}")
-                        app.include_router(router, prefix=prefix, tags=[tag])
+                if hasattr(module, 'REGISTER'):
+                    module.REGISTER()
+                    if hasattr(module, 'router'):
+                        router = module.router.get_router()
+                        if router and isinstance(router, Router):
+                            prefix = f"/{filename}"
+                            tag = f"{filename}".capitalize()
+                            logger.info(
+                                f"Loading plugin {filename} with prefix {prefix} and tag {tag}")
+                            app.include_router(router, prefix=prefix, tags=[tag])
+                            loaded_plugins[filename] = module
+                else:
+                    logger.warning(f"Plugin {filename} does not have a REGISTER method and will not be loaded")
+
+def unload_plugin(app: FastAPI, plugin_name: str):
+    if plugin_name in loaded_plugins:
+        module = loaded_plugins.pop(plugin_name)
+        if hasattr(module, 'UNREGISTER'):
+            module.UNREGISTER()
+        if hasattr(module, 'router'):
+            router = module.router.get_router()
+            app.router.routes = [route for route in app.router.routes if route not in router.routes]
+        logger.info(f"Unloaded plugin {plugin_name}")
+    else:
+        logger.warning(f"Plugin {plugin_name} not found")
