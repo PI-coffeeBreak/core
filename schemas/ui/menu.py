@@ -1,6 +1,5 @@
-from pydantic import BaseModel, HttpUrl
+from pydantic import BaseModel
 from typing import List
-from pymongo import MongoClient
 
 class MenuOption(BaseModel):
     icon: str
