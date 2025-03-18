@@ -5,6 +5,7 @@ from starlette.requests import Request
 from starlette.responses import Response
 
 from routes import users, activities, activity_types, auth
+from routes.ui import page
 from dependencies.database import engine, Base
 
 app = FastAPI()
@@ -26,6 +27,7 @@ app.include_router(users.router, prefix="/users", tags=["Users"])
 app.include_router(activities.router, prefix="/activities", tags=["Activities"])
 app.include_router(activity_types.router, prefix="/activity_types", tags=["Activity Types"])
 app.include_router(auth.router, tags=["Auth"])
+app.include_router(page.router, prefix="/pages", tags=["Pages"])
 
 # Run with: uvicorn main:app --reload --log-config logging_config.json
 # load env file: --env-file <env_file>
