@@ -5,9 +5,10 @@ from starlette.requests import Request
 from starlette.responses import Response
 from contextlib import asynccontextmanager
 
-from routes import users, activities, activity_types, auth, main_menu
+from routes import users, activities, activity_types, auth
 from dependencies.database import engine, Base
 from dependencies.mongodb import db
+from routes.ui import main_menu
 from schemas.ui.main_menu import MainMenu, MenuOption
 
 app = FastAPI()
