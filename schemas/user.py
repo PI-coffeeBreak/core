@@ -8,11 +8,23 @@ class UserBase(BaseModel):
 
 # Schema for creating a user (excluding ID)
 class UserCreate(UserBase):
-    pass
+    firstName: str
+    lastName: str
+    enabled: bool
 
 class User(UserBase):
-    id: int
-    is_active: bool
+    id: str
+    firstName: str
+    lastName: str
+    emailVerified: bool
+    createdTimestamp: int
+    enabled: bool
+    totp: bool
+    disableableCredentialTypes: List[str]
+    requiredActions: List[str]
+    notBefore: int
+    access: dict
+    is_active: bool = True
 
     class Config:
         from_attributes = True
