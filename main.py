@@ -7,6 +7,7 @@ from contextlib import asynccontextmanager
 from plugin_loader import plugin_loader
 
 from routes import users, activities, activity_types, auth
+from routes.ui import page
 from dependencies.database import engine, Base
 from dependencies.mongodb import db
 from routes.ui import main_menu
@@ -50,6 +51,7 @@ app.include_router(users.router, prefix="/users", tags=["Users"])
 app.include_router(activities.router, prefix="/activities", tags=["Activities"])
 app.include_router(activity_types.router, prefix="/activity-types", tags=["Activity Types"])
 app.include_router(auth.router, tags=["Auth"])
+app.include_router(page.router, prefix="/pages", tags=["Pages"])
 
 # Include UI routers
 app.include_router(main_menu.router, prefix="/ui/menu", tags=["Main Menu"])
