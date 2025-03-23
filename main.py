@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 import logging
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
@@ -13,7 +14,25 @@ from dependencies.mongodb import db
 from routes.ui import main_menu
 from schemas.ui.main_menu import MainMenu, MenuOption
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await create_default_main_menu()
+    yield
+
+app = FastAPI(lifespan=lifespan)
+
+origins = [
+    "http://localhost",
+    "http://localhost:5173",
+]
+
+app.add_middleware( 
+    CORSMiddleware, 
+    allow_origins=origins, 
+    allow_credentials=True, 
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 logger = logging.getLogger("coffeebreak")
 
@@ -38,13 +57,6 @@ async def create_default_main_menu():
             MenuOption(icon="profile", label="Profile", href="/profile"),
         ])
         await main_menu_collection.insert_one(default_main_menu.model_dump())
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    await create_default_main_menu()
-    yield
-
-app = FastAPI(lifespan=lifespan)
 
 # Include routers
 app.include_router(users.router, prefix="/users", tags=["Users"])
