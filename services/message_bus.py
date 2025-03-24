@@ -5,13 +5,13 @@ from schemas.notification import NotificationRequest
 class MessageBus:
     _instance = None
 
-    def __new__(cls, db: Session):
+    def __new__(cls, db: Session = None):
         if cls._instance is None:
             cls._instance = super(MessageBus, cls).__new__(cls)
             cls._instance._initialized = False
         return cls._instance
 
-    def __init__(self, db: Session):
+    def __init__(self, db: Session = None):
         if self._initialized:
             return
         self.db = db
@@ -22,8 +22,15 @@ class MessageBus:
         if type not in self.handlers:
             self.handlers[type] = []
         self.handlers[type].append(callback)
+    
+    def unregister_message_handler(self, type: str, callback):
+        if type in self.handlers:
+            self.handlers[type].remove(callback)
 
     def send_notification(self, notification: NotificationRequest):
+        if self.db is None:
+            raise ValueError("MessageBus not initialized with a database session")
+        
         recipient_type = RecipientType(notification.recipient_type)
         new_message = Message(
             type=notification.type,
@@ -43,6 +50,9 @@ class MessageBus:
         return new_message
 
     def receive(self, message: Message):
+        if self.db is None:
+            raise ValueError("MessageBus not initialized with a database session")
+
         message.delivered = True
         self.db.commit()
         self.db.refresh(message)

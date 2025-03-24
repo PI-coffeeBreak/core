@@ -93,6 +93,7 @@ class Router:
         for route in router.routes:
             route["path"] = f"{prefix}{route['path']}"
             self.routes.append(route)
+            logger.info(f"Included route: {route['method']} {route['path']}")
 
     def get_router(self):
         """Registers the stored routes into FastAPI if it's available."""
@@ -127,3 +128,6 @@ class Router:
         except ImportError:
             logger.warning("FastAPI is not installed. Routes will not be registered.")
             return None
+
+    def __str__(self):
+        return f"Router(routes={self.routes})"
