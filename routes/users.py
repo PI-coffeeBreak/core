@@ -30,7 +30,7 @@ async def create_user_endpoint(user_data: UserCreate):
     except HTTPException as e:
         raise e
 
-@router.get("/{user_id}", response_model=UserSchema)
+@router.get("/{user_id}", response_model=UserSchema, dependencies=[Depends(check_role(["admin", "manage_users"]))])
 async def get_user_endpoint(user_id: str):
     try:
         user = await get_user(user_id)
@@ -38,7 +38,7 @@ async def get_user_endpoint(user_id: str):
     except HTTPException as e:
         raise e
 
-@router.get("/", response_model=List[UserSchema])
+@router.get("/", response_model=List[UserSchema], dependencies=[Depends(check_role(["admin", "manage_users"]))])
 async def list_users_endpoint():
     try:
         users = await list_users()
@@ -46,7 +46,7 @@ async def list_users_endpoint():
     except HTTPException as e:
         raise e
 
-@router.put("/{user_id}", response_model=UserSchema, dependencies=[Depends(check_role(["admin", "user_manager"]))])
+@router.put("/{user_id}", response_model=UserSchema, dependencies=[Depends(check_role(["admin", "manage_users"]))])
 async def update_user_endpoint(user_id: str, user_data: UserCreate):
     try:
         updated_user = await update_user(user_id, user_data.model_dump())
@@ -54,7 +54,7 @@ async def update_user_endpoint(user_id: str, user_data: UserCreate):
     except HTTPException as e:
         raise e
 
-@router.delete("/{user_id}", response_model=UserSchema, dependencies=[Depends(check_role(["admin", "user_manager"]))])
+@router.delete("/{user_id}", response_model=UserSchema, dependencies=[Depends(check_role(["admin", "manage_users"]))])
 async def delete_user_endpoint(user_id: str):
     try:
         deleted_user = await delete_user(user_id)
