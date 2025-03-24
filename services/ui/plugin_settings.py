@@ -5,6 +5,10 @@ from dependencies.mongodb import db
 
 plugin_settings_collection = db['plugin_settings']
 
+async def list_plugin_settings() -> List[PluginSetting]:
+    plugin_settings = await plugin_settings_collection.find().to_list(None)
+    return [PluginSetting(**plugin_setting) for plugin_setting in plugin_settings]
+
 async def create_plugin_setting(plugin_setting: PluginSetting) -> PluginSetting:
     result = await plugin_settings_collection.insert_one(plugin_setting.model_dump())
     if not result.inserted_id:
