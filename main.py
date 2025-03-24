@@ -1,18 +1,15 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import logging
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
-from starlette.responses import Response
 from contextlib import asynccontextmanager
 from plugin_loader import plugin_loader
 from dependencies.app import set_current_app
-
-from routes import users, activities, activity_types, auth, plugins
-from routes.ui import page, main_menu, plugin_settings
 from dependencies.database import engine, Base
 from dependencies.mongodb import db
 from schemas.ui.main_menu import MainMenu, MenuOption
+from routes import routes_app
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -60,17 +57,8 @@ async def create_default_main_menu():
 
 plugin_loader('plugins', app)
 
-# Include routers
-app.include_router(users.router, prefix="/users", tags=["Users"])
-app.include_router(activities.router, prefix="/activities", tags=["Activities"])
-app.include_router(activity_types.router, prefix="/activity-types", tags=["Activity Types"])
-app.include_router(auth.router, tags=["Auth"])
-app.include_router(page.router, prefix="/pages", tags=["Pages"])
-app.include_router(plugins.router, prefix="/plugins", tags=["Plugins"])
-
-# Include UI routers
-app.include_router(main_menu.router, prefix="/ui/menu", tags=["Main Menu"])
-app.include_router(plugin_settings.router, prefix="/ui/plugin-config", tags=["Plugin Settings"])
+# Include all routers from routes/__init__.py
+app.include_router(routes_app, prefix="/api/v1")
 
 # Run with: uvicorn main:app --reload --log-config logging_config.json
 # load env file: --env-file <env_file>
