@@ -14,11 +14,22 @@ def get_activities(db: Session = Depends(get_db)):
 
 @router.post("/", response_model=ActivitySchema)
 def create_activity(activity: ActivityCreate, db: Session = Depends(get_db)):
-    new_activity = Activity(**activity.dict())
+    new_activity = Activity(**activity.model_dump())
     db.add(new_activity)
     db.commit()
     db.refresh(new_activity)
     return new_activity
+
+@router.post("/batch", response_model=List[ActivitySchema])
+def create_activities(activities: List[ActivityCreate], db: Session = Depends(get_db)):
+    new_activities = [Activity(**activity.model_dump()) for activity in activities]
+    
+    db.add_all(new_activities)
+    db.commit()
+
+    for activity in new_activities:
+        db.refresh(activity)
+    return new_activities
 
 @router.get("/{activity_id}", response_model=ActivitySchema)
 def get_activity(activity_id: int, db: Session = Depends(get_db)):
