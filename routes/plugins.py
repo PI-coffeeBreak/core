@@ -12,7 +12,7 @@ from services.user_service import (
 )
 from plugin_loader import load_plugin, unload_plugin, plugins_modules
 from dependencies.app import get_current_app
-from services.plugin_service import register_settings_callback, get_settings_callback
+from services.plugin_service import update_plugin_settings, is_plugin_loaded
 from schemas.plugin import PluginAction, PluginSettings
 
 router = APIRouter()
@@ -41,28 +41,22 @@ async def list_plugins_endpoint():
 
 @router.get("/{plugin_name}", response_model=dict)
 async def fetch_plugin_endpoint(plugin_name: str):
-    if (plugin_name in plugins_modules):
+    if plugin_name in plugins_modules:
         module = plugins_modules[plugin_name]
         details = {
             "name": plugin_name,
             "has_register": hasattr(module, 'REGISTER'),
             "has_unregister": hasattr(module, 'UNREGISTER'),
-            "has_router": hasattr(module, 'router')
+            "has_router": hasattr(module, 'router'),
+            "is_loaded": is_plugin_loaded(plugin_name)
         }
         return details
     else:
-        raise HTTPException(
-            status_code=404, detail=f"Plugin {plugin_name} not found")
+        raise HTTPException(status_code=404, detail=f"Plugin {plugin_name} not found")
 
 
 @router.post("/submit-settings/{plugin_name}", response_model=dict)
 async def submit_settings_endpoint(plugin_name: str, settings: PluginSettings):
-    callback = get_settings_callback(plugin_name)
-    if not callback:
-        raise HTTPException(
-            status_code=404, detail=f"No callback registered for {plugin_name}")
-    try:
-        callback(settings.settings)
-        return {"status": "success", "message": f"Settings for {plugin_name} submitted"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    if not update_plugin_settings(plugin_name, settings.settings):
+        raise HTTPException(status_code=404, detail=f"Plugin {plugin_name} not found or does not have SETTINGS dictionary")
+    return {"status": "success", "message": f"Settings for {plugin_name} submitted"}
