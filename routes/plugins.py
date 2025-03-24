@@ -19,7 +19,7 @@ router = APIRouter()
 
 
 @router.post("/load", response_model=dict)
-async def load_plugin_endpoint(action: PluginAction, app: FastAPI = Depends(get_current_app)):
+async def load_plugin_endpoint(action: PluginAction, app: FastAPI = Depends(get_current_app), current_user: dict = Depends(check_role(["manage_plugins"]))):
     if not load_plugin(app, action.plugin_name):
         raise HTTPException(
             status_code=400, detail=f"Plugin {action.plugin_name} is not an unloaded plugin")
@@ -27,7 +27,7 @@ async def load_plugin_endpoint(action: PluginAction, app: FastAPI = Depends(get_
 
 
 @router.post("/unload", response_model=dict)
-async def unload_plugin_endpoint(action: PluginAction, app: FastAPI = Depends(get_current_app)):
+async def unload_plugin_endpoint(action: PluginAction, app: FastAPI = Depends(get_current_app), current_user: dict = Depends(check_role(["manage_plugins"]))):
     if not unload_plugin(app, action.plugin_name):
         raise HTTPException(
             status_code=400, detail=f"Plugin {action.plugin_name} is not a loaded plugin")
@@ -35,12 +35,12 @@ async def unload_plugin_endpoint(action: PluginAction, app: FastAPI = Depends(ge
 
 
 @router.get("/", response_model=List[str])
-async def list_plugins_endpoint():
+async def list_plugins_endpoint(current_user: dict = Depends(check_role(["manage_plugins"]))):
     return list(plugins_modules.keys())
 
 
 @router.get("/{plugin_name}", response_model=dict)
-async def fetch_plugin_endpoint(plugin_name: str):
+async def fetch_plugin_endpoint(plugin_name: str, current_user: dict = Depends(check_role(["manage_plugins"]))):
     if plugin_name in plugins_modules:
         module = plugins_modules[plugin_name]
         details = {
@@ -56,7 +56,7 @@ async def fetch_plugin_endpoint(plugin_name: str):
 
 
 @router.post("/submit-settings/{plugin_name}", response_model=dict)
-async def submit_settings_endpoint(plugin_name: str, settings: PluginSettings):
+async def submit_settings_endpoint(plugin_name: str, settings: PluginSettings, current_user: dict = Depends(check_role(["manage_plugins"]))):
     if not update_plugin_settings(plugin_name, settings.settings):
         raise HTTPException(status_code=404, detail=f"Plugin {plugin_name} not found or does not have SETTINGS dictionary")
     return {"status": "success", "message": f"Settings for {plugin_name} submitted"}
