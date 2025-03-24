@@ -16,7 +16,6 @@ def create_group(group_name: str):
 def add_client_to_group(client_id: str, group_name: str):
     """Adiciona um cliente a um grupo no Keycloak usando `python-keycloak`"""
     try:
-        # Buscar o ID do grupo pelo nome
         groups = keycloak_admin.get_groups()
         group = next((g for g in groups if g["name"] == group_name), None)
 
@@ -25,7 +24,6 @@ def add_client_to_group(client_id: str, group_name: str):
 
         group_id = group["id"]
 
-        # Adicionar cliente ao grupo
         keycloak_admin.group_user_add(client_id, group_id)
         return {"message": f"Client '{client_id}' added to group '{group_name}' successfully"}
 
@@ -45,7 +43,6 @@ def get_users_in_group(group_name: str):
 
         group_id = group["id"]
 
-        # Buscar usuários no grupo
         users = keycloak_admin.get_group_members(group_id)
         return users
 

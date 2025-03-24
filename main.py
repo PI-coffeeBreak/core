@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 import logging
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -6,8 +6,9 @@ from starlette.requests import Request
 from starlette.responses import Response
 from contextlib import asynccontextmanager
 from plugin_loader import plugin_loader
+from dependencies.app import set_current_app
 
-from routes import users, activities, activity_types, auth
+from routes import users, activities, activity_types, auth, plugins
 from routes.ui import page
 from dependencies.database import engine, Base
 from dependencies.mongodb import db
@@ -20,6 +21,8 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(lifespan=lifespan)
+
+set_current_app(app)
 
 origins = [
     "http://localhost",
@@ -35,8 +38,6 @@ app.add_middleware(
 )
 
 logger = logging.getLogger("coffeebreak")
-
-plugin_loader('plugins', app)
 
 class CoffeeBreakLoggerMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
@@ -58,12 +59,15 @@ async def create_default_main_menu():
         ])
         await main_menu_collection.insert_one(default_main_menu.model_dump())
 
+plugin_loader('plugins', app)
+
 # Include routers
 app.include_router(users.router, prefix="/users", tags=["Users"])
 app.include_router(activities.router, prefix="/activities", tags=["Activities"])
 app.include_router(activity_types.router, prefix="/activity-types", tags=["Activity Types"])
 app.include_router(auth.router, tags=["Auth"])
 app.include_router(page.router, prefix="/pages", tags=["Pages"])
+app.include_router(plugins.router, prefix="/plugins", tags=["Plugins"])
 
 # Include UI routers
 app.include_router(main_menu.router, prefix="/ui/menu", tags=["Main Menu"])
