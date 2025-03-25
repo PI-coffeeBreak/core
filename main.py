@@ -6,6 +6,9 @@ from starlette.requests import Request
 from contextlib import asynccontextmanager
 from plugin_loader import plugin_loader
 from dependencies.app import set_current_app
+
+from routes import totp, users, activities, activity_types, auth
+from routes.ui import page, main_menu, plugin_settings
 from dependencies.database import engine, Base
 from dependencies.mongodb import db
 from schemas.ui.main_menu import MainMenu, MenuOption
@@ -17,8 +20,6 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(lifespan=lifespan)
-
-set_current_app(app)
 
 origins = [
     "http://localhost",
@@ -55,7 +56,8 @@ async def create_default_main_menu():
         ])
         await main_menu_collection.insert_one(default_main_menu.model_dump())
 
-plugin_loader('plugins', app)
+set_current_app(routes_app)
+plugin_loader('plugins', routes_app)
 
 # Include all routers from routes/__init__.py
 app.include_router(routes_app, prefix="/api/v1")
