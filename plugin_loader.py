@@ -1,6 +1,6 @@
 import os
 import importlib.util
-from fastapi import FastAPI
+from fastapi import APIRouter
 import logging
 from utils.api import Router
 
@@ -9,7 +9,7 @@ logger = logging.getLogger("coffeebreak.core")
 plugins_modules = {}
 registered_plugins = {}
 
-def plugin_loader(plugins_dir, app: FastAPI):
+def plugin_loader(plugins_dir, app: APIRouter):
     for filename in os.listdir(plugins_dir):
         if os.path.isdir(os.path.join(plugins_dir, filename)) and filename != '__pycache__' and filename[-9:] != '.disabled':
             package_path = os.path.join(plugins_dir, filename)
@@ -30,7 +30,7 @@ def plugin_loader(plugins_dir, app: FastAPI):
                         f"Plugin {filename} does not have a REGISTER method and will not be loaded")
 
 
-def load_plugin(app: FastAPI, plugin_name) -> bool:
+def load_plugin(app: APIRouter, plugin_name) -> bool:
     if plugin_name not in plugins_modules or plugin_name in registered_plugins:
         return False
     module = plugins_modules[plugin_name]
@@ -47,7 +47,7 @@ def load_plugin(app: FastAPI, plugin_name) -> bool:
     return True
 
 
-def unload_plugin(app: FastAPI, plugin_name: str) -> bool:
+def unload_plugin(app: APIRouter, plugin_name: str) -> bool:
     if plugin_name in registered_plugins:
         module = registered_plugins.pop(plugin_name)
         if hasattr(module, 'UNREGISTER'):
