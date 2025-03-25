@@ -7,16 +7,16 @@ from contextlib import asynccontextmanager
 from plugin_loader import plugin_loader
 from dependencies.app import set_current_app
 
-from routes import totp, users, activities, activity_types, auth
-from routes.ui import page, main_menu, plugin_settings
 from dependencies.database import engine, Base
 from dependencies.mongodb import db
 from schemas.ui.main_menu import MainMenu, MenuOption
+from schemas.ui.color_theme import ColorTheme
 from routes import routes_app
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await create_default_main_menu()
+    await create_default_color_theme()
     yield
 
 app = FastAPI(lifespan=lifespan)
@@ -55,6 +55,34 @@ async def create_default_main_menu():
             MenuOption(icon="profile", label="Profile", href="/profile"),
         ])
         await main_menu_collection.insert_one(default_main_menu.model_dump())
+
+# Create default color theme if it does not exist
+async def create_default_color_theme():
+    color_themes_collection = db['color_themes']
+    if await color_themes_collection.count_documents({}) == 0:
+        default_color_theme = ColorTheme(
+            base_100="#f3faff",
+            base_200="#d6d6d3",
+            base_300="#d6d6d3",
+            base_content="#726d65",
+            primary="#4f2b1d",
+            primary_content="#f3faff",
+            secondary="#c6baa2",
+            secondary_content="#f1fbfb",
+            accent="#faa275",
+            accent_content="#f3fbf6",
+            neutral="#caa751",
+            neutral_content="#f3faff",
+            info="#00b2dd",
+            info_content="#f2fafd",
+            success="#0cae00",
+            success_content="#f5faf4",
+            warning="#fbad00",
+            warning_content="#221300",
+            error="#ff1300",
+            error_content="#fff6f4",
+        )
+        await color_themes_collection.insert_one(default_color_theme.model_dump())
 
 set_current_app(routes_app)
 plugin_loader('plugins', routes_app)
