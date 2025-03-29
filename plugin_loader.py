@@ -9,6 +9,8 @@ logger = logging.getLogger("coffeebreak.core")
 plugins_modules = {}
 registered_plugins = {}
 
+required_attributes = ['REGISTER']
+
 def plugin_loader(plugins_dir, app: APIRouter):
     for filename in os.listdir(plugins_dir):
         if os.path.isdir(os.path.join(plugins_dir, filename)) and filename != '__pycache__' and filename[-9:] != '.disabled':
@@ -19,15 +21,16 @@ def plugin_loader(plugins_dir, app: APIRouter):
                     package_path.replace("/", "."), init_file)
                 module = importlib.util.module_from_spec(spec)
                 spec.loader.exec_module(module)
-                if hasattr(module, 'REGISTER'):
-                    if not hasattr(module, 'UNREGISTER'):
-                        logger.warning(
-                            f"Plugin {filename} does not have a UNREGISTER method")
-                    plugins_modules[filename] = module
-                    load_plugin(app, filename)
-                else:
+                missing_attrs = [attr for attr in required_attributes if not hasattr(module, attr)]
+                if missing_attrs:
                     logger.warning(
-                        f"Plugin {filename} does not have a REGISTER method and will not be loaded")
+                        f"Plugin {filename} is missing required attributes: {', '.join(missing_attrs)} and will not be loaded")
+                    continue
+                if not hasattr(module, 'UNREGISTER'):
+                    logger.warning(
+                        f"Plugin {filename} does not have a UNREGISTER method")
+                plugins_modules[filename] = module
+                load_plugin(app, filename)
 
 
 def load_plugin(app: APIRouter, plugin_name) -> bool:
