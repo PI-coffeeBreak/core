@@ -9,7 +9,9 @@ from services.user_service import (
     get_user,
     list_users,
     update_user,
-    delete_user
+    delete_user,
+    list_roles,
+    list_role_users
 )
 
 router = APIRouter()
@@ -22,13 +24,30 @@ async def read_users_me(current_user: dict = Depends(get_current_user)):
 async def im_organizer(current_user: dict = Depends(check_role(["organizer"]))):
     return current_user
 
-@router.post("/", response_model=UserSchema, dependencies=[Depends(check_role(["admin", "user_manager"]))])
+@router.post("/", response_model=UserSchema, dependencies=[Depends(check_role(["admin", "manage_users"]))])
 async def create_user_endpoint(user_data: UserCreate):
     try:
         created_user = await create_user(user_data.model_dump())
         return created_user
     except HTTPException as e:
         raise e
+    
+@router.get("/roles", dependencies=[Depends(check_role(["admin", "manage_users"]))])
+async def list_roles_endpoint():
+    try:
+        roles = await list_roles()
+        return roles
+    except HTTPException as e:
+        raise e
+    
+@router.get("/roles/users", dependencies=[Depends(check_role(["admin", "manage_users"]))])
+async def list_roles_endpoint():
+    try:
+        role_users = await list_role_users()
+        return role_users
+    except HTTPException as e:
+        raise e
+
 
 @router.get("/{user_id}", response_model=UserSchema, dependencies=[Depends(check_role(["admin", "manage_users"]))])
 async def get_user_endpoint(user_id: str):

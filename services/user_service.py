@@ -8,6 +8,27 @@ async def list_users() -> List[dict]:
         return users
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to list users: {str(e)}")
+    
+async def list_roles() -> List:
+    try:
+        roles = keycloak_admin.get_realm_roles()
+        return roles
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to list roles: {str(e)}")
+    
+async def list_role_users() -> dict:
+    roles = await list_roles()
+    role_users = {}
+    try:
+        for r in roles:
+            role_name = r["name"]
+            users = keycloak_admin.get_realm_role_members(role_name)
+            role_users[role_name] = users
+            
+        return role_users
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to list role users: {str(e)}")
 
 async def get_user(user_id: str) -> dict:
     try:
