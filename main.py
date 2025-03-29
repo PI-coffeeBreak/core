@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.openapi.utils import get_openapi
 import logging
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
@@ -12,6 +13,7 @@ from dependencies.mongodb import db
 from schemas.ui.main_menu import MainMenu, MenuOption
 from schemas.ui.color_theme import ColorTheme
 from routes import routes_app
+from swagger import configure_swagger_ui
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -89,6 +91,10 @@ plugin_loader('plugins', routes_app)
 
 # Include all routers from routes/__init__.py
 app.include_router(routes_app, prefix="/api/v1")
+
+@app.on_event("startup")
+async def configure_swagger_ui_event():
+    configure_swagger_ui(app)
 
 # Run with: uvicorn main:app --reload --log-config logging_config.json
 # load env file: --env-file <env_file>
