@@ -11,44 +11,48 @@ class Router:
         self.routes: List[Dict] = []
         self.events: Dict[str, Callable] = {}
 
-    def add_route(self, path: str, method: str, handler: Callable):
+    def add_route(self, path: str, method: str, handler: Callable, response_model=None):
         """Registers a new route definition."""
-
-        self.routes.append({"path": path, "method": method.upper(), "handler": handler})
+        self.routes.append({
+            "path": path,
+            "method": method.upper(),
+            "handler": handler,
+            "response_model": response_model
+        })
         logger.info(f"Registered route: {method.upper()} {path}")
 
-    def get(self, path: str):
+    def get(self, path: str, response_model=None):
         """Decorator for defining a GET route."""
         def wrapper(handler: Callable):
-            self.add_route(path, "GET", handler)
+            self.add_route(path, "GET", handler, response_model)
             return handler
         return wrapper
 
-    def post(self, path: str):
+    def post(self, path: str, response_model=None):
         """Decorator for defining a POST route."""
         def wrapper(handler: Callable):
-            self.add_route(path, "POST", handler)
+            self.add_route(path, "POST", handler, response_model)
             return handler
         return wrapper
 
-    def put(self, path: str):
+    def put(self, path: str, response_model=None):
         """Decorator for defining a PUT route."""
         def wrapper(handler: Callable):
-            self.add_route(path, "PUT", handler)
+            self.add_route(path, "PUT", handler, response_model)
             return handler
         return wrapper
 
-    def delete(self, path: str):
+    def delete(self, path: str, response_model=None):
         """Decorator for defining a DELETE route."""
         def wrapper(handler: Callable):
-            self.add_route(path, "DELETE", handler)
+            self.add_route(path, "DELETE", handler, response_model)
             return handler
         return wrapper
 
-    def patch(self, path: str):
+    def patch(self, path: str, response_model=None):
         """Decorator for defining a PATCH route."""
         def wrapper(handler: Callable):
-            self.add_route(path, "PATCH", handler)
+            self.add_route(path, "PATCH", handler, response_model)
             return handler
         return wrapper
 
@@ -103,15 +107,15 @@ class Router:
             router = APIRouter()
             for route in self.routes:
                 if route["method"] == "GET":
-                    router.get(route["path"])(route["handler"])
+                    router.get(route["path"], response_model=route["response_model"])(route["handler"])
                 elif route["method"] == "POST":
-                    router.post(route["path"])(route["handler"])
+                    router.post(route["path"], response_model=route["response_model"])(route["handler"])
                 elif route["method"] == "PUT":
-                    router.put(route["path"])(route["handler"])
+                    router.put(route["path"], response_model=route["response_model"])(route["handler"])
                 elif route["method"] == "DELETE":
-                    router.delete(route["path"])(route["handler"])
+                    router.delete(route["path"], response_model=route["response_model"])(route["handler"])
                 elif route["method"] == "PATCH":
-                    router.patch(route["path"])(route["handler"])
+                    router.patch(route["path"], response_model=route["response_model"])(route["handler"])
                 elif route["method"] == "OPTIONS":
                     router.options(route["path"])(route["handler"])
                 elif route["method"] == "HEAD":
