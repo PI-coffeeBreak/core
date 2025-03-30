@@ -46,8 +46,6 @@ class CoffeeBreakLoggerMiddleware(BaseHTTPMiddleware):
 
 app.add_middleware(CoffeeBreakLoggerMiddleware)
 
-Base.metadata.create_all(bind=engine)
-
 # Create default main menu if it does not exist
 async def create_default_main_menu():
     main_menu_collection = db['main_menu_collection']
@@ -88,6 +86,8 @@ async def create_default_color_theme():
 
 set_current_app(routes_app)
 plugin_loader('plugins', routes_app)
+
+Base.metadata.create_all(bind=engine) # should only be called after all plugins being loaded
 
 # Include all routers from routes/__init__.py
 app.include_router(routes_app, prefix="/api/v1")
