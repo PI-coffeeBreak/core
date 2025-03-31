@@ -52,8 +52,8 @@ def verify(data: str, signature: str) -> bool:
     hmac_sha256.update(decoded_signature[:4])
     digest = hmac_sha256.digest()
     digest = bytes([a ^ b for a, b in zip(digest[:16], digest[16:])])
-    print("digest (hex):", digest.hex())
-    print("signature (hex):", decoded_signature[4:].hex())
+    logger.debug("digest (hex): %s", digest.hex())
+    logger.debug("signature (hex): %s", decoded_signature[4:].hex())
     return digest == decoded_signature[4:]
 
 def encode(data: str) -> str:
