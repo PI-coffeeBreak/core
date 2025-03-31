@@ -1,8 +1,7 @@
 # CoffeeBreak Core
 
 The CoffeeBreak Core is the backend service for the CoffeeBreak application. It provides APIs, middleware, and database integration to support the application's functionality.
-It includes a dynamic plugin system for adding new features or integrating external system.
-
+It includes a dynamic plugin system for adding new features or integrating external systems.
 ## Features
 
 - **FastAPI Framework**: Built with FastAPI for high performance and easy-to-use APIs.
