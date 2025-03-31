@@ -2,6 +2,7 @@ import os
 import importlib.util
 from fastapi import APIRouter
 import logging
+import asyncio
 from utils.api import Router
 
 logger = logging.getLogger("coffeebreak.core")
@@ -12,6 +13,9 @@ registered_plugins = {}
 required_attributes = ['REGISTER']
 
 def plugin_loader(plugins_dir, app: APIRouter):
+    # Create a list to hold the load plugin tasks
+    load_tasks = []
+    
     for filename in os.listdir(plugins_dir):
         if os.path.isdir(os.path.join(plugins_dir, filename)) and filename != '__pycache__' and filename[-9:] != '.disabled':
             package_path = os.path.join(plugins_dir, filename)
@@ -30,14 +34,24 @@ def plugin_loader(plugins_dir, app: APIRouter):
                     logger.warning(
                         f"Plugin {filename} does not have a UNREGISTER method")
                 plugins_modules[filename] = module
-                load_plugin(app, filename)
+                
+                # Instead of directly calling load_plugin, create a task and add it to the list
+                loop = asyncio.get_event_loop()
+                task = loop.create_task(load_plugin(app, filename))
+                load_tasks.append(task)
 
 
-def load_plugin(app: APIRouter, plugin_name) -> bool:
+async def load_plugin(app: APIRouter, plugin_name) -> bool:
     if plugin_name not in plugins_modules or plugin_name in registered_plugins:
         return False
     module = plugins_modules[plugin_name]
-    module.REGISTER()
+    
+    # Handle both async and sync REGISTER functions
+    if asyncio.iscoroutinefunction(module.REGISTER):
+        await module.REGISTER()
+    else:
+        module.REGISTER()
+        
     if hasattr(module, 'router'):
         if module.router and isinstance(module.router, Router):
             logger.debug(f"Router: {module.router}")
@@ -50,11 +64,14 @@ def load_plugin(app: APIRouter, plugin_name) -> bool:
     return True
 
 
-def unload_plugin(app: APIRouter, plugin_name: str) -> bool:
+async def unload_plugin(app: APIRouter, plugin_name: str) -> bool:
     if plugin_name in registered_plugins:
         module = registered_plugins.pop(plugin_name)
         if hasattr(module, 'UNREGISTER'):
-            module.UNREGISTER()
+            if asyncio.iscoroutinefunction(module.UNREGISTER):
+                await module.UNREGISTER()
+            else:
+                module.UNREGISTER()
         if hasattr(module, 'router'):
             router = module.router.get_router()
             app.router.routes = [route for route in app.router.routes if route not in router.routes]
