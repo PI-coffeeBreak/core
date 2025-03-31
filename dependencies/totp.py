@@ -24,53 +24,62 @@ def sign(data: str) -> str:
     expiration = t + validity
     expiration = expiration.to_bytes(4, byteorder='big')
     hmac_sha256.update(expiration)
-    hash = hmac_sha256.digest()
+    digest = hmac_sha256.digest()
     # xor the first 16 bytes with the last 16 bytes
-    hash = bytes([a ^ b for a, b in zip(hash[:16], hash[16:])])
+    digest = bytes([a ^ b for a, b in zip(digest[:16], digest[16:])])
     # base85 encode the hash
-    signature = base64.b85encode(expiration + hash)
+    signature = base64.b85encode(expiration + digest)
     return signature.decode()
 
 
-def verify(data: str) -> bool:
-    if len(data) < 25:
-        return False
-    
-    logger.debug("Has the minimum length")
-    signature = base64.b85decode(data[-25:].encode())
-    expiration = int.from_bytes(signature[:4], byteorder='big')
-    if expiration < time.time():
-        return False
-    
-    logger.debug("Has the right time")
-    msg = data[:-25]
-    hmac_sha256 = hmac.new(k, digestmod=sha256)
-    hmac_sha256.update(msg.encode())
-    hmac_sha256.update(signature[:4])
-    hash = hmac_sha256.digest()
-    hash = bytes([a ^ b for a, b in zip(hash[:16], hash[16:])])
-    return hash == signature[4:]
+def is_valid_signature_length(data: str) -> bool:
+    return len(data) >= 25
 
+def is_signature_expired(expiration: int) -> bool:
+    return expiration < time.time()
+
+def verify(data: str, signature: str) -> bool:
+    if not is_valid_signature_length(signature):
+        return False
+
+    decoded_signature = base64.b85decode(signature.encode())
+    expiration = int.from_bytes(decoded_signature[:4], byteorder='big')
+    if is_signature_expired(expiration):
+        return False
+
+    hmac_sha256 = hmac.new(k, digestmod=sha256)
+    hmac_sha256.update(data.encode())
+    hmac_sha256.update(decoded_signature[:4])
+    digest = hmac_sha256.digest()
+    digest = bytes([a ^ b for a, b in zip(digest[:16], digest[16:])])
+    print("digest (hex):", digest.hex())
+    print("signature (hex):", decoded_signature[4:].hex())
+    return digest == decoded_signature[4:]
 
 def encode(data: str) -> str:
     return data + sign(data)
 
 
-def decode(data: str) -> str:
-    if verify(data):
+from typing import Optional
+
+def decode(data: str) -> Optional[str]:
+    if verify(data[:-25], data[-25:]):
         return data[:-25]
     return None
 
-
-def generate_qr_code(data: str) -> StreamingResponse:
+def generate_qr_code_bytes(data: str) -> bytes:
     signed_data = encode(data)
-    logger.debug(f"QR code generated: {signed_data}")
     qr = qrcode.make(signed_data)
     buf = BytesIO()
     qr.save(buf, format="PNG")
     buf.seek(0)
-    return StreamingResponse(buf, media_type="image/png")
+    return buf.getvalue()
 
+def generate_qr_code(data: str) -> StreamingResponse:
+    signed_data = encode(data)
+    logger.debug(f"QR code generated: {signed_data}")
+    qr_bytes = generate_qr_code_bytes(data)
+    return StreamingResponse(BytesIO(qr_bytes), media_type="image/png")
 
 async def get_totp_user(otp_request: OTPRequest):
     otp = otp_request.otp
@@ -81,8 +90,8 @@ async def get_totp_user(otp_request: OTPRequest):
 
 
 if __name__ == "__main__":
-    signed_msg = sign("Hello World")
+    signed_msg = encode("Hello World")
     print(signed_msg)
-    print(verify(signed_msg))
-    signed_msg = signed_msg[:-1] + "A" # tamper with the message
-    print(verify(signed_msg))
+    print(verify(signed_msg[:-25], signed_msg[-25:]))
+    signed_msg = signed_msg[:-1] + "A"
+    print(verify(signed_msg[:-25], signed_msg[-25:]))
