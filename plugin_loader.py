@@ -13,6 +13,10 @@ registered_plugins = {}
 required_attributes = ['REGISTER']
 
 def plugin_loader(plugins_dir, app: APIRouter):
+    """
+    Load all plugins from the plugins directory.
+    This is now an async function that properly awaits the tasks.
+    """
     # Create a list to hold the load plugin tasks
     load_tasks = []
     
@@ -35,10 +39,28 @@ def plugin_loader(plugins_dir, app: APIRouter):
                         f"Plugin {filename} does not have a UNREGISTER method")
                 plugins_modules[filename] = module
                 
-                # Instead of directly calling load_plugin, create a task and add it to the list
+                logging.debug(f"Loading plugin {filename} from {package_path}")
                 loop = asyncio.get_event_loop()
                 task = loop.create_task(load_plugin(app, filename))
                 load_tasks.append(task)
+
+
+async def plugin_unloader(app: APIRouter):
+    """
+    Unload all loaded plugins.
+    This is now an async function that properly awaits the tasks.
+    """
+    logger.debug("Unloading plugins...")
+    # Create a list to hold the unload plugin tasks
+    unload_tasks = []
+    
+    for plugin_name in list(registered_plugins.keys()):
+        task = unload_plugin(app, plugin_name)
+        unload_tasks.append(task)
+
+    # Wait for all plugins to finish unloading
+    if unload_tasks:
+        await asyncio.gather(*unload_tasks)
 
 
 async def load_plugin(app: APIRouter, plugin_name) -> bool:
@@ -61,6 +83,8 @@ async def load_plugin(app: APIRouter, plugin_name) -> bool:
             logger.debug(f"Loading plugin router {plugin_name} with prefix {prefix} and tag {tag}: {router}")
             app.include_router(router, prefix=prefix, tags=[tag])
             registered_plugins[plugin_name] = module
+    else:
+        registered_plugins[plugin_name] = module
     return True
 
 
