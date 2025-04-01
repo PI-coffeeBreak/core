@@ -11,8 +11,13 @@ async def list_users() -> List[dict]:
     
 async def list_roles() -> List:
     try:
+        # Fetch all roles
         roles = keycloak_admin.get_realm_roles()
-        return roles
+        
+        # Filter roles with "cb-" prefix
+        filtered_roles = [role for role in roles if role["name"].startswith("cb-")]
+        
+        return filtered_roles
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to list roles: {str(e)}")
     
