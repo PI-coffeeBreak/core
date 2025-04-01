@@ -14,12 +14,18 @@ from schemas.ui.main_menu import MainMenu, MenuOption
 from schemas.ui.color_theme import ColorTheme
 from routes import routes_app
 from swagger import configure_swagger_ui
+from plugin_loader import plugin_unloader
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await create_default_main_menu()
     await create_default_color_theme()
-    yield
+    configure_swagger_ui(app)
+    try:
+        yield
+    finally:
+        await plugin_unloader(routes_app)
+        pass
 
 app = FastAPI(lifespan=lifespan)
 
@@ -91,10 +97,6 @@ Base.metadata.create_all(bind=engine) # should only be called after all plugins 
 
 # Include all routers from routes/__init__.py
 app.include_router(routes_app, prefix="/api/v1")
-
-@app.on_event("startup")
-async def configure_swagger_ui_event():
-    configure_swagger_ui(app)
 
 # Run with: uvicorn main:app --reload --log-config logging_config.json
 # load env file: --env-file <env_file>
