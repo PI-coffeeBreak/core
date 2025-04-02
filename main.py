@@ -96,7 +96,7 @@ plugin_loader('plugins', routes_app)
 Base.metadata.create_all(bind=engine) # should only be called after all plugins being loaded
 
 # Include all routers from routes/__init__.py
-app.include_router(routes_app, prefix="/api/v1")
+app.include_router(routes_app)
 
 # Run with: uvicorn main:app --reload --log-config logging_config.json
 # load env file: --env-file <env_file>
