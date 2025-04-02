@@ -1,6 +1,11 @@
 from fastapi.openapi.utils import get_openapi
+import os
+
+# Get the API prefix from the environment variables
+API_PREFIX = os.getenv("API_PREFIX", "/api/v1")  # Default to "/api/v1" if not set
 
 def configure_swagger_ui(app):
+    app.openapi_url = f"{API_PREFIX}/openapi.json"
     app.openapi_schema = get_openapi(
         title="Your API",
         version="1.0.0",
@@ -11,7 +16,7 @@ def configure_swagger_ui(app):
         "type": "oauth2",
         "flows": {
             "password": {
-                "tokenUrl": "/api/v1/token",
+                "tokenUrl": f"{API_PREFIX}/token",
                 "scopes": {},
             }
         },

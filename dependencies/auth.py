@@ -1,11 +1,28 @@
+from keycloak import connection
+def custom_urljoin(a, b):
+    # If 'a' ends with a slash and 'b' starts with one, remove one slash
+    if a.endswith('/') and b.startswith('/'):
+        return a + b[1:]
+    # If 'a' doesn't end with a slash and 'b' starts with one, add a slash between them
+    elif not a.endswith('/') and b.startswith('/'):
+        return a + b
+    # If 'a' ends with a slash and 'b' doesn't start with one, just concatenate
+    elif a.endswith('/') and not b.startswith('/'):
+        return a + b
+    # If neither ends or starts with a slash, add one between them
+    else:
+        return a + '/' + b
+connection.urljoin = custom_urljoin
 from keycloak import KeycloakAdmin, KeycloakOpenID
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 import os
 import logging
 import sys
+import requests
 
 logger = logging.getLogger("coffeebreak.core")
+
 
 # Keycloak configuration
 KEYCLOAK_URL = os.getenv("KEYCLOAK_URL")
@@ -16,6 +33,8 @@ KEYCLOAK_CLIENT_SECRET = os.getenv("KEYCLOAK_CLIENT_SECRET")
 if not all([KEYCLOAK_URL, KEYCLOAK_REALM, KEYCLOAK_CLIENT_ID, KEYCLOAK_CLIENT_SECRET]):
     logger.error("One or more Keycloak environment variables are not set. Exiting program.")
     raise sys.exit(1)
+
+logger.info(f'Connecting with keycloak at: {KEYCLOAK_URL}')
 
 # Initialize Keycloak OpenID (for authentication)
 keycloak_openid = KeycloakOpenID(
