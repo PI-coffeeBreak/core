@@ -42,3 +42,4 @@ jobs:
             -Dsonar.verbose=true
             -Dsonar.tests=tests/
             -Dsonar.test.inclusions=tests/**/*.py
+            -Dsonar.projectBaseDir=/home/runner/work/core/core
