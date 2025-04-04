@@ -40,6 +40,5 @@ jobs:
             -Dsonar.core.codeCoveragePlugin=cobertura
             -Dsonar.python.coverage.reportPaths=coverage.xml
             -Dsonar.verbose=true
-            -Dsonar.tests=tests/
+            -Dsonar.tests=tests
             -Dsonar.test.inclusions=tests/**/*.py
-            -Dsonar.projectBaseDir=/home/runner/work/core/core
