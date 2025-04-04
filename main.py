@@ -25,7 +25,6 @@ async def lifespan(app: FastAPI):
         yield
     finally:
         await plugin_unloader(routes_app)
-        pass
 
 app = FastAPI(root_path="/api/v1", openapi_prefix="/api/v1", lifespan=lifespan)
 
