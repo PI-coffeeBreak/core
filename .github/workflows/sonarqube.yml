@@ -28,8 +28,8 @@ jobs:
           # Additional arguments for the sonarcloud scanner
           args:
             # Unique key of your project. You can find it in SonarQube > [my project] > Project Information (top-right menu)
-            -Dsonar.projectKey=Coffeebreak-Core
-            -Dsonar.projectName=Coffeebreak Core
+            -Dsonar.projectKey=core
+            -Dsonar.projectName=Core
             -Dsonar.projectVersion=0.1
             -Dsonar.sources=.
             -Dsonar.exclusions=tests/**
