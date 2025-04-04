@@ -28,6 +28,14 @@ class PageService:
     async def delete_page(self, page_id: str) -> bool:
         result = await self.collection.delete_one({"_id": ObjectId(page_id)})
         return result.deleted_count > 0
+    
+    async def list_pages(self):
+        cursor = self.collection.find()
+        pages = []
+        async for page in cursor:
+            page["_id"] = str(page["_id"])
+            pages.append(page)
+        return pages
 
     async def get_page(self, page_id: str) -> Dict:
         page = await self.collection.find_one({"_id": ObjectId(page_id)})
