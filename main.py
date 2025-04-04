@@ -27,11 +27,12 @@ async def lifespan(app: FastAPI):
         await plugin_unloader(routes_app)
         pass
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(root_path="/api/v1", openapi_prefix="/api/v1", lifespan=lifespan)
 
 origins = [
     "http://localhost",
     "http://localhost:5173",
+    "http://localhost:5175"
 ]
 
 app.add_middleware( 
