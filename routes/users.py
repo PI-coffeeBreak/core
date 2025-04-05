@@ -32,6 +32,17 @@ async def create_user_endpoint(user_data: UserCreate):
     except HTTPException as e:
         raise e
     
+@router.post("/batch", response_model=List[UserSchema], dependencies=[Depends(check_role(["admin", "manage_users"]))])
+async def create_users_batch(users_data: List[UserCreate]):
+    created_users = []
+    for user_data in users_data:
+        try:
+            created_user = await create_user(user_data.model_dump())
+            created_users.append(created_user)
+        except HTTPException as e:
+            raise e
+    return created_users
+    
 @router.get("/roles", dependencies=[Depends(check_role(["admin", "manage_users"]))])
 async def list_roles_endpoint():
     try:
