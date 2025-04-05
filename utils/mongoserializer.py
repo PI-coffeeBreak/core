@@ -1,7 +1,7 @@
 from bson import ObjectId
-from typing import Any, Dict
+from bson.errors import InvalidId
 from fastapi import HTTPException
-
+from typing import Dict, Any
 
 def to_object_id(id_str: str) -> ObjectId:
     """
@@ -9,9 +9,8 @@ def to_object_id(id_str: str) -> ObjectId:
     """
     try:
         return ObjectId(id_str)
-    except Exception:
+    except InvalidId:
         raise HTTPException(status_code=400, detail=f"'{id_str}' is not a valid ObjectId")
-
 
 def from_mongo(document: Dict[str, Any]) -> Dict[str, Any]:
     """
