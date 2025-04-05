@@ -1,3 +1,4 @@
+import asyncio
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
@@ -10,23 +11,47 @@ from dependencies.app import set_current_app
 
 from dependencies.database import engine, Base
 from dependencies.mongodb import db
-from schemas.ui.main_menu import MainMenu, MenuOption
+from schemas.ui.menu import Menu, MenuOption
 from schemas.ui.color_theme import ColorTheme
 from routes import routes_app
 from swagger import configure_swagger_ui
 from plugin_loader import plugin_unloader
 
+logger = logging.getLogger("coffeebreak")
+
+app = FastAPI(root_path="/api/v1", openapi_prefix="/api/v1")
+set_current_app(routes_app)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Load all plugins first
+    await plugin_loader('plugins', routes_app)
+
+    # Create database tables after plugins are loaded
+    Base.metadata.create_all(bind=engine)
+
+    # Include all routers from routes/__init__.py after plugins
+    app.include_router(routes_app)
+
+    # Configure Swagger UI after all routes are registered
+    configure_swagger_ui(app)
+
+    # Create default configurations
     await create_default_main_menu()
     await create_default_color_theme()
-    configure_swagger_ui(app)
+
+    # Log all available routes
+    for route in routes_app.routes:
+        logger.info(
+            f"Route: {route.path} [{route.methods if hasattr(route, 'methods') else 'WebSocket'}]")
+
     try:
         yield
     finally:
         await plugin_unloader(routes_app)
 
-app = FastAPI(root_path="/api/v1", openapi_prefix="/api/v1", lifespan=lifespan)
+app.router.lifespan_context = lifespan
 
 origins = [
     "http://localhost",
@@ -34,35 +59,40 @@ origins = [
     "http://localhost:5175"
 ]
 
-app.add_middleware( 
-    CORSMiddleware, 
-    allow_origins=origins, 
-    allow_credentials=True, 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-logger = logging.getLogger("coffeebreak")
 
 class CoffeeBreakLoggerMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         response = await call_next(request)
-        logger.debug(f"{request.method} {request.url} - {response.status_code}")
+        logger.debug(
+            f"{request.method} {request.url} - {response.status_code}")
         return response
+
 
 app.add_middleware(CoffeeBreakLoggerMiddleware)
 
 # Create default main menu if it does not exist
+
+
 async def create_default_main_menu():
     main_menu_collection = db['main_menu_collection']
     if await main_menu_collection.count_documents({}) == 0:
-        default_main_menu = MainMenu(options=[
+        default_main_menu = Menu(options=[
             MenuOption(icon="home", label="Home", href="/home"),
             MenuOption(icon="profile", label="Profile", href="/profile"),
         ])
         await main_menu_collection.insert_one(default_main_menu.model_dump())
 
 # Create default color theme if it does not exist
+
+
 async def create_default_color_theme():
     color_themes_collection = db['color_themes']
     if await color_themes_collection.count_documents({}) == 0:
@@ -89,14 +119,6 @@ async def create_default_color_theme():
             error_content="#fff6f4",
         )
         await color_themes_collection.insert_one(default_color_theme.model_dump())
-
-set_current_app(routes_app)
-plugin_loader('plugins', routes_app)
-
-Base.metadata.create_all(bind=engine) # should only be called after all plugins being loaded
-
-# Include all routers from routes/__init__.py
-app.include_router(routes_app)
 
 # Run with: uvicorn main:app --reload --log-config logging_config.json
 # load env file: --env-file <env_file>
