@@ -5,7 +5,11 @@ logger = logging.getLogger("coffeebreak.core")
 
 CONNECTION_STRING = os.getenv('MONGODB_URI')
 
-if CONNECTION_STRING is not None:
-    client = AsyncIOMotorClient(CONNECTION_STRING)
+db = None
 
-    db = client.get_default_database()
+if CONNECTION_STRING is None:
+    logger.error("MONGODB_URI environment variable is not set.")
+    raise RuntimeError("Missing MONGODB_URI environment variable")
+
+client = AsyncIOMotorClient(CONNECTION_STRING)
+db = client.get_default_database()

@@ -31,8 +31,8 @@ KEYCLOAK_CLIENT_ID = os.getenv("KEYCLOAK_CLIENT_ID")
 KEYCLOAK_CLIENT_SECRET = os.getenv("KEYCLOAK_CLIENT_SECRET")
 
 if not all([KEYCLOAK_URL, KEYCLOAK_REALM, KEYCLOAK_CLIENT_ID, KEYCLOAK_CLIENT_SECRET]):
-    logger.error("One or more Keycloak environment variables are not set. Exiting program.")
-    raise sys.exit(1)
+    logger.error("One or more Keycloak environment variables are not set.")
+    raise RuntimeError("Missing Keycloak environment variables")
 
 logger.info(f'Connecting with keycloak at: {KEYCLOAK_URL}')
 
