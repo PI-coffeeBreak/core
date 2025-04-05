@@ -3,6 +3,7 @@ import schemas.ui.page as page_schema
 from dependencies.auth import check_role
 from bson import ObjectId
 from services.ui.page_service import page_service
+from typing import List
 
 router = APIRouter()
 
@@ -30,6 +31,17 @@ async def delete_page(page_id: str, user_info: dict = Depends(check_role(["custo
         raise HTTPException(status_code=404, detail="Error deleting page")
     return {"page_id": page_id}
 
+@router.get("/", response_model=List[page_schema.PageResponse], summary="List all pages")
+async def list_pages():
+    pages = await page_service.list_pages()
+    return [
+        {
+            "page_id": page["_id"],
+            "title": page["title"],
+            "components": page["components"]
+        }
+        for page in pages
+    ]
 
 @router.get("/{page_id}", response_model=page_schema.PageResponse, summary="Get a page by its ID")
 async def get_page(page_id: str):
