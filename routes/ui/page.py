@@ -61,7 +61,7 @@ async def get_page(page_id: str):
     logger.debug(f"Getting page {page_id}")
     page = await page_service.get_page(page_id)
     if not page:
-        logger.error(f"Page {page_id} not found")
+        logger.error("Page not found")
         raise HTTPException(status_code=404, detail="Error getting page")
     return {
         "page_id": page["id"],
