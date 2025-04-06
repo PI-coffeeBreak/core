@@ -12,7 +12,7 @@ from dependencies.database import engine, Base
 from routes import routes_app
 from swagger import configure_swagger_ui
 from plugin_loader import plugin_unloader
-from defaults import create_default_main_menu, create_default_color_theme
+from defaults import create_default_main_menu, create_default_color_theme, create_default_components, create_default_pages
 
 logger = logging.getLogger("coffeebreak")
 
@@ -37,6 +37,8 @@ async def lifespan(app: FastAPI):
     # Initialize default configurations
     await create_default_main_menu()
     await create_default_color_theme()
+    await create_default_pages()
+    await create_default_components()
 
     # Log all available routes
     for route in routes_app.routes:
