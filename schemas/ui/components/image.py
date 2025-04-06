@@ -12,3 +12,8 @@ class ImageComponent(BaseComponentSchema):
     """
     src: str = Field(..., description="The source URL of the image")
     alt: str = Field(..., description="Alternative text for the image")
+    className: str = Field(
+        default="",
+        description="CSS classes to be applied",
+        optional=True
+    )
