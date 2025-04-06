@@ -48,7 +48,7 @@ async def list_pages():
     logger.debug(f"Found {len(pages)} pages")
     return [
         {
-            "page_id": page["_id"],
+            "page_id": page["id"],
             "title": page["title"],
             "components": page["components"]
         }
@@ -63,8 +63,11 @@ async def get_page(page_id: str):
     if not page:
         logger.error(f"Page {page_id} not found")
         raise HTTPException(status_code=404, detail="Error getting page")
-    return {"page_id": page_id, "title": page["title"], "components": page["components"]}
-
+    return {
+        "page_id": page["id"],
+        "title": page["title"],
+        "components": page["components"]
+    }
 
 @router.post("/{page_id}/components", response_model=page_schema.BaseComponentSchema, summary="Add a new component to the page")
 async def add_component(page_id: str, component: page_schema.AddBaseComponentSchema, user_info: dict = Depends(check_role(["customization"]))):
@@ -89,4 +92,4 @@ async def update_component(page_id: str, component_id: str, updated_component: p
     updated = await page_service.update_component(page_id, component_id, updated_component.dict())
     if not updated:
         raise HTTPException(status_code=404, detail="Error updating component")
-    return {"id": component_id, "name": updated_component.name}
+    return {"component_id": component_id, "name": updated_component.name}
