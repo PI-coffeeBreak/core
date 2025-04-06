@@ -13,7 +13,7 @@ router = APIRouter()
 
 @router.post("/load", response_model=dict)
 async def load_plugin_endpoint(action: PluginAction, app: FastAPI = Depends(get_current_app), current_user: dict = Depends(check_role(["manage_plugins"]))):
-    if not load_plugin(app, action.plugin_name):
+    if not await load_plugin(app, action.plugin_name):
         raise HTTPException(
             status_code=400, detail=f"Plugin {action.plugin_name} is not an unloaded plugin")
     return {"status": "success", "message": f"Plugin {action.plugin_name} loaded"}
@@ -21,7 +21,7 @@ async def load_plugin_endpoint(action: PluginAction, app: FastAPI = Depends(get_
 
 @router.post("/unload", response_model=dict)
 async def unload_plugin_endpoint(action: PluginAction, app: FastAPI = Depends(get_current_app), current_user: dict = Depends(check_role(["manage_plugins"]))):
-    if not unload_plugin(app, action.plugin_name):
+    if not await unload_plugin(app, action.plugin_name):
         raise HTTPException(
             status_code=400, detail=f"Plugin {action.plugin_name} is not a loaded plugin")
     return {"status": "success", "message": f"Plugin {action.plugin_name} unloaded"}
@@ -43,5 +43,6 @@ async def fetch_plugin_endpoint(plugin_name: str, current_user: dict = Depends(c
 @router.post("/submit-settings/{plugin_name}", response_model=dict)
 async def submit_settings_endpoint(plugin_name: str, settings: PluginSettings, current_user: dict = Depends(check_role(["manage_plugins"]))):
     if not update_plugin_settings(plugin_name, settings.settings):
-        raise HTTPException(status_code=404, detail=f"Plugin {plugin_name} not found or does not have SETTINGS dictionary")
+        raise HTTPException(
+            status_code=404, detail=f"Plugin {plugin_name} not found or does not have SETTINGS dictionary")
     return {"status": "success", "message": f"Settings for {plugin_name} submitted"}

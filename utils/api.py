@@ -1,6 +1,6 @@
 import logging
 from typing import Callable, Dict, List
-from fastapi import WebSocket, Depends
+from fastapi import WebSocket, Depends, HTTPException
 
 logger = logging.getLogger("plugin_router")
 
