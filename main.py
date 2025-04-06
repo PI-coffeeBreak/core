@@ -1,7 +1,6 @@
 import asyncio
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.openapi.utils import get_openapi
 import logging
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
@@ -10,12 +9,10 @@ from plugin_loader import plugin_loader
 from dependencies.app import set_current_app
 
 from dependencies.database import engine, Base
-from dependencies.mongodb import db
-from schemas.ui.menu import Menu, MenuOption
-from schemas.ui.color_theme import ColorTheme
 from routes import routes_app
 from swagger import configure_swagger_ui
 from plugin_loader import plugin_unloader
+from defaults import create_default_main_menu, create_default_color_theme
 
 logger = logging.getLogger("coffeebreak")
 
@@ -37,13 +34,13 @@ async def lifespan(app: FastAPI):
     # Configure Swagger UI after all routes are registered
     configure_swagger_ui(app)
 
-    # Create default configurations
+    # Initialize default configurations
     await create_default_main_menu()
     await create_default_color_theme()
 
     # Log all available routes
     for route in routes_app.routes:
-        logger.info(
+        logger.debug(
             f"Route: {route.path} [{route.methods if hasattr(route, 'methods') else 'WebSocket'}]")
 
     try:
@@ -51,8 +48,10 @@ async def lifespan(app: FastAPI):
     finally:
         await plugin_unloader(routes_app)
 
+
 app.router.lifespan_context = lifespan
 
+# CORS configuration for development environments
 origins = [
     "http://localhost",
     "http://localhost:5173",
@@ -78,47 +77,7 @@ class CoffeeBreakLoggerMiddleware(BaseHTTPMiddleware):
 
 app.add_middleware(CoffeeBreakLoggerMiddleware)
 
-# Create default main menu if it does not exist
-
-
-async def create_default_main_menu():
-    main_menu_collection = db['main_menu_collection']
-    if await main_menu_collection.count_documents({}) == 0:
-        default_main_menu = Menu(options=[
-            MenuOption(icon="home", label="Home", href="/home"),
-            MenuOption(icon="profile", label="Profile", href="/profile"),
-        ])
-        await main_menu_collection.insert_one(default_main_menu.model_dump())
-
-# Create default color theme if it does not exist
-
-
-async def create_default_color_theme():
-    color_themes_collection = db['color_themes']
-    if await color_themes_collection.count_documents({}) == 0:
-        default_color_theme = ColorTheme(
-            base_100="#f3faff",
-            base_200="#d6d6d3",
-            base_300="#d6d6d3",
-            base_content="#726d65",
-            primary="#4f2b1d",
-            primary_content="#f3faff",
-            secondary="#c6baa2",
-            secondary_content="#f1fbfb",
-            accent="#faa275",
-            accent_content="#f3fbf6",
-            neutral="#caa751",
-            neutral_content="#f3faff",
-            info="#00b2dd",
-            info_content="#f2fafd",
-            success="#0cae00",
-            success_content="#f5faf4",
-            warning="#fbad00",
-            warning_content="#221300",
-            error="#ff1300",
-            error_content="#fff6f4",
-        )
-        await color_themes_collection.insert_one(default_color_theme.model_dump())
-
-# Run with: uvicorn main:app --reload --log-config logging_config.json
-# load env file: --env-file <env_file>
+# Start the application with:
+# uvicorn main:app --reload --log-config logging_config.json
+# Additional configuration:
+# --env-file <env_file>
