@@ -1,6 +1,7 @@
 from fastapi import APIRouter
-from . import users, activities, activity_types, auth, plugins, totp
+from . import users, activities, activity_types, auth, plugins, totp, notifications
 from .ui import color_themes, page, main_menu, plugin_settings
+from .components import router as components_router
 
 # Create a new APIRouter instance
 routes_app = APIRouter()
@@ -15,6 +16,8 @@ routes_app.include_router(auth.router, tags=["Auth"])
 routes_app.include_router(page.router, prefix="/pages", tags=["Pages"])
 routes_app.include_router(plugins.router, prefix="/plugins", tags=["Plugins"])
 routes_app.include_router(totp.router, prefix="/totp", tags=["TOTP"])
+routes_app.include_router(notifications.router,
+                          prefix="/notifications", tags=["Notifications"])
 
 # Include UI routers
 routes_app.include_router(main_menu.router, prefix="/ui/menu", tags=["UI"])
@@ -22,3 +25,7 @@ routes_app.include_router(plugin_settings.router,
                           prefix="/ui/plugin-config", tags=["Plugin Settings"])
 routes_app.include_router(
     color_themes.router, prefix="/ui/color-theme", tags=["Color Theme"])
+
+# Include component registry router
+routes_app.include_router(
+    components_router, prefix="/components", tags=["Components"])

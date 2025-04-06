@@ -4,11 +4,16 @@ from dependencies.auth import check_role
 from bson import ObjectId
 from services.ui.page_service import page_service
 from typing import List
+import logging
+
+logger = logging.getLogger("coffeebreak.core")
 
 router = APIRouter()
 
+
 @router.post("/", response_model=page_schema.PageResponse, summary="Create a new page")
 async def create_page(page: page_schema.PageSchema, user_info: dict = Depends(check_role(["customization"]))):
+    logger.debug(f"Creating new page with title: {page.title}")
     components_with_id = [
         {**c.dict(), "component_id": str(ObjectId())} for c in page.components
     ]
@@ -18,22 +23,29 @@ async def create_page(page: page_schema.PageSchema, user_info: dict = Depends(ch
 
 @router.put("/{page_id}", response_model=page_schema.PageResponse, summary="Update an existing page")
 async def update_page(page_id: str, page: page_schema.PageSchema, user_info: dict = Depends(check_role(["customization"]))):
+    logger.debug(f"Updating page {page_id} with title: {page.title}")
     updated = await page_service.update_page(page_id, page.title, [c.dict() for c in page.components])
     if not updated:
+        logger.error(f"Failed to update page {page_id}")
         raise HTTPException(status_code=404, detail="Error updating page")
     return {"page_id": page_id, "title": page.title, "components": page.components}
 
 
 @router.delete("/{page_id}", response_model=page_schema.DeletePageResponse, summary="Delete a page by its ID")
 async def delete_page(page_id: str, user_info: dict = Depends(check_role(["customization"]))):
+    logger.debug(f"Deleting page {page_id}")
     deleted = await page_service.delete_page(page_id)
     if not deleted:
+        logger.error(f"Failed to delete page {page_id}")
         raise HTTPException(status_code=404, detail="Error deleting page")
     return {"page_id": page_id}
 
+
 @router.get("/", response_model=List[page_schema.PageResponse], summary="List all pages")
 async def list_pages():
+    logger.debug("Listing all pages")
     pages = await page_service.list_pages()
+    logger.debug(f"Found {len(pages)} pages")
     return [
         {
             "page_id": page["_id"],
@@ -43,10 +55,13 @@ async def list_pages():
         for page in pages
     ]
 
+
 @router.get("/{page_id}", response_model=page_schema.PageResponse, summary="Get a page by its ID")
 async def get_page(page_id: str):
+    logger.debug(f"Getting page {page_id}")
     page = await page_service.get_page(page_id)
     if not page:
+        logger.error(f"Page {page_id} not found")
         raise HTTPException(status_code=404, detail="Error getting page")
     return {"page_id": page_id, "title": page["title"], "components": page["components"]}
 
