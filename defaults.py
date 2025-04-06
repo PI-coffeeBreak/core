@@ -18,7 +18,7 @@ async def create_default_main_menu():
     if await main_menu_collection.count_documents({}) == 0:
         default_main_menu = Menu(options=[
             MenuOption(icon="FaHome", label="Home", href="/home"),
-            MenuOption(icon="FaProfile", label="Profile", href="/profile"),
+            MenuOption(icon="FaUser", label="Profile", href="/profile"),
             MenuOption(icon="FaBook", label="Activity", href="/activity"),
         ])
         await main_menu_collection.insert_one(default_main_menu.model_dump())
