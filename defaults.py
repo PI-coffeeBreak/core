@@ -2,7 +2,11 @@ import logging
 from dependencies.mongodb import db
 from schemas.ui.menu import Menu, MenuOption
 from schemas.ui.color_theme import ColorTheme
-from schemas.ui.page import BaseComponentSchema
+from schemas.ui.page import Page
+from schemas.ui.components.title import TitleComponent
+from schemas.ui.components.image import ImageComponent
+from schemas.ui.components.text import TextComponent
+from schemas.ui.components.button import ButtonComponent
 from services.ui.page_service import page_service
 from services.component_registry import ComponentRegistry
 
@@ -14,8 +18,9 @@ async def create_default_main_menu():
     main_menu_collection = db['main_menu_collection']
     if await main_menu_collection.count_documents({}) == 0:
         default_main_menu = Menu(options=[
-            MenuOption(icon="home", label="Home", href="/home"),
-            MenuOption(icon="profile", label="Profile", href="/profile"),
+            MenuOption(icon="FaHome", label="Home", href="/home"),
+            MenuOption(icon="FaUser", label="Profile", href="/profile"),
+            MenuOption(icon="FaBook", label="Activity", href="/activity"),
         ])
         await main_menu_collection.insert_one(default_main_menu.model_dump())
 
@@ -26,6 +31,71 @@ async def create_default_main_menu():
         for option in menu['options']:
             logger.debug(
                 f"  - {option['label']}: {option['href']} ({option['icon']})")
+
+
+async def create_default_pages():
+    """Creates default pages if they don't exist"""
+    pages_collection = db['pages']
+    if await pages_collection.count_documents({}) == 0:
+        # Create home page with Welcome component
+        home_page = Page(
+            title="Home",
+            components=[
+                {
+                    "name": "Welcome"
+                }
+            ]
+        )
+        await pages_collection.insert_one(home_page.model_dump())
+        logger.debug(f"Created default home page: {home_page}")
+
+        # Create profile page with UserProfile component
+        profile_page = Page(
+            title="Profile",
+            components=[
+                {
+                    "name": "User Profile"
+                }
+            ]
+        )
+        await pages_collection.insert_one(profile_page.model_dump())
+        logger.debug(f"Created default profile page: {profile_page}")
+
+        # Create activity page with multiple components
+        title_component = TitleComponent(
+            name="Title",
+            text="Activity about AI"
+        )
+
+        image_component = ImageComponent(
+            name="Image",
+            src="",
+            alt="Activity Image"
+        )
+
+        text_component = TextComponent(
+            name="Text",
+            content="This is a page for activities. skfl df jf kdf ddfh d jkfsj fdshf dj fds jdfh kjfhdsjkhf sh fjds jkh hjk dj dkj sjkf jskd dh fdsjk fkjsh sdh sjk kfsj hkjsdh fkshh fds fhdfsjfkfdhf fsdjhf sjhf dj ksdhsjd kjh fdfhkjjhfdskjf d jfdsjf dsjf jfkkdh sjfh jhf shhf jsh jsf hsjfh jkd jh jshh kjdshjsh fkshf sjkd fkshh jdh fks sj skh fjs sh jks ksdh fjksd jshh fkjhf sjdh shf js kj dhs fkjf hf sdkj kjs dfh"
+        )
+
+        button_component = ButtonComponent(
+            name="Button",
+            text="Start Activity",
+            METHOD="GET",
+            URL="https://jsonplaceholder.typicode.com/posts/1"
+        )
+
+        activity_page = Page(
+            title="Activity",
+            components=[
+                title_component.model_dump(),
+                image_component.model_dump(),
+                text_component.model_dump(),
+                button_component.model_dump()
+            ]
+        )
+        await pages_collection.insert_one(activity_page.model_dump())
+        logger.debug(f"Created default activity page: {activity_page}")
 
 
 async def create_default_color_theme():
@@ -56,90 +126,11 @@ async def create_default_color_theme():
         )
         await color_themes_collection.insert_one(default_color_theme.model_dump())
 
-async def create_default_pages():
-    """Creates the default pages if they don't exist"""
-    # Check if the pages collection is empty
-    pages_collection = db['pages']
-    if await pages_collection.count_documents({}) == 0:
-        default_page = {
-            "title": "Home",
-            "components": [
-                {"component_id": "1", "type": "TextComponent", "content": "Welcome to CoffeeBreak!"},
-            ]
-        }
-        activities_page = {
-            "title": "Activities",
-            "components": [
-                {"component_id": "2", "type": "TextComponent", "content": "Activities Page"},
-            ]
-        }
-        profile_page = {
-            "title": "Profile",
-            "components": [
-                {"component_id": "3", "type": "TextComponent", "content": "Profile Page"},
-            ]
-        }
-        await pages_collection.insert_one(default_page)
-        await pages_collection.insert_one(activities_page)
-        await pages_collection.insert_one(profile_page)
-        logger.debug("Default pages created successfully")
-    else:
-        logger.debug("Default pages already exist")
 
-async def create_default_components():
-    """Creates the default components if they don't exist"""
-    # Ensure the ComponentRegistry is initialized
-    component_registry = ComponentRegistry()
-    if not component_registry:
-        raise ValueError("Component registry is not initialized")
-
-    # Define the default components
-    class TextComponent(BaseComponentSchema):
-        name: str
-        content: str
-
-    class TitleComponent(BaseComponentSchema):
-        name: str
-        title: str
-
-    class ImageComponent(BaseComponentSchema):
-        name: str
-        src: str
-
-    class ButtonComponent(BaseComponentSchema):
-        name: str
-        label: str
-        methods: list = ["GET", "POST", "PUT", "DELETE"]
-        url: str
-
-    class RowComponent(BaseComponentSchema):
-        name: str
-        components: list
-
-    class ColumnComponent(BaseComponentSchema):
-        name: str
-        components: list
-
-    class CardComponent(BaseComponentSchema):
-        name: str
-        components: list
-
-    # Register the components
-    try:
-        component_registry.register_component(TextComponent)
-        component_registry.register_component(TitleComponent)
-        component_registry.register_component(ImageComponent)
-        component_registry.register_component(ButtonComponent)
-        component_registry.register_component(RowComponent)
-        component_registry.register_component(ColumnComponent)
-        component_registry.register_component(CardComponent)
-        logger.debug("Default components registered successfully")
-    except ValueError as e:
-        logger.warning(f"Component registration failed: {str(e)}")
-
-    # Log all available components
-    components = component_registry.list_components()
-    logger.debug("Available components:")
-    for name, component in components.items():
-        logger.debug(f"  - {name}: {component.__name__}")
-    logger.debug("Default components created successfully")
+async def initialize_defaults():
+    """Initialize all default data"""
+    logger.info("Initializing default data...")
+    await create_default_main_menu()
+    await create_default_pages()
+    await create_default_color_theme()
+    logger.info("Default data initialization completed")
