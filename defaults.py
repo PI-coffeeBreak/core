@@ -8,6 +8,7 @@ from schemas.ui.components.image import ImageComponent
 from schemas.ui.components.text import TextComponent
 from schemas.ui.components.button import ButtonComponent
 from services.ui.page_service import page_service
+from services.component_registry import ComponentRegistry
 
 logger = logging.getLogger("coffeebreak")
 
@@ -125,6 +126,14 @@ async def create_default_color_theme():
         )
         await color_themes_collection.insert_one(default_color_theme.model_dump())
 
+async def register_default_components():
+    """Register default components"""
+    component_registry = ComponentRegistry()
+    component_registry.register_component(TitleComponent)
+    component_registry.register_component(ImageComponent)
+    component_registry.register_component(TextComponent)
+    component_registry.register_component(ButtonComponent)
+
 
 async def initialize_defaults():
     """Initialize all default data"""
@@ -132,4 +141,5 @@ async def initialize_defaults():
     await create_default_main_menu()
     await create_default_pages()
     await create_default_color_theme()
+    await register_default_components()
     logger.info("Default data initialization completed")
