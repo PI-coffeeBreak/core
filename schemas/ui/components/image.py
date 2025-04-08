@@ -1,8 +1,8 @@
-from pydantic import BaseModel, Field
+from pydantic import Field
 from schemas.ui.page import BaseComponentSchema
 
 
-class ImageComponent(BaseComponentSchema):
+class Image(BaseComponentSchema):
     """
     Schema for Image component
 

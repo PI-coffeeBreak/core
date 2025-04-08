@@ -1,9 +1,9 @@
-from pydantic import BaseModel, Field
+from pydantic import Field
 from schemas.ui.page import BaseComponentSchema
 from schemas.ui.color import TextColor
 
 
-class TextComponent(BaseComponentSchema):
+class Text(BaseComponentSchema):
     """
     Schema for Text component
 
