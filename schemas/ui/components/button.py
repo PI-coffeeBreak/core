@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import Field
 from schemas.ui.page import BaseComponentSchema
 from schemas.ui.color import BackgroundColor, TextColor
 from enum import Enum
@@ -9,7 +9,7 @@ class HTTPMethod(str, Enum):
     PUT = "PUT"
     DELETE = "DELETE"
 
-class ButtonComponent(BaseComponentSchema):
+class Button(BaseComponentSchema):
     """
     Schema for Button component
 

@@ -3,11 +3,10 @@ from dependencies.mongodb import db
 from schemas.ui.menu import Menu, MenuOption
 from schemas.ui.color_theme import ColorTheme
 from schemas.ui.page import Page
-from schemas.ui.components.title import TitleComponent
-from schemas.ui.components.image import ImageComponent
-from schemas.ui.components.text import TextComponent
-from schemas.ui.components.button import ButtonComponent
-from services.ui.page_service import page_service
+from schemas.ui.components.title import Title
+from schemas.ui.components.image import Image
+from schemas.ui.components.text import Text
+from schemas.ui.components.button import Button
 from services.component_registry import ComponentRegistry
 
 logger = logging.getLogger("coffeebreak")
@@ -62,23 +61,23 @@ async def create_default_pages():
         logger.debug(f"Created default profile page: {profile_page}")
 
         # Create activity page with multiple components
-        title_component = TitleComponent(
+        title_component = Title(
             name="Title",
             text="Activity about AI"
         )
 
-        image_component = ImageComponent(
+        image_component = Image(
             name="Image",
             src="",
             alt="Activity Image"
         )
 
-        text_component = TextComponent(
+        text_component = Text(
             name="Text",
             content="This is a page for activities. skfl df jf kdf ddfh d jkfsj fdshf dj fds jdfh kjfhdsjkhf sh fjds jkh hjk dj dkj sjkf jskd dh fdsjk fkjsh sdh sjk kfsj hkjsdh fkshh fds fhdfsjfkfdhf fsdjhf sjhf dj ksdhsjd kjh fdfhkjjhfdskjf d jfdsjf dsjf jfkkdh sjfh jhf shhf jsh jsf hsjfh jkd jh jshh kjdshjsh fkshf sjkd fkshh jdh fks sj skh fjs sh jks ksdh fjksd jshh fkjhf sjdh shf js kj dhs fkjf hf sdkj kjs dfh"
         )
 
-        button_component = ButtonComponent(
+        button_component = Button(
             name="Button",
             text="Start Activity",
             METHOD="GET",
@@ -129,17 +128,21 @@ async def create_default_color_theme():
 async def register_default_components():
     """Register default components"""
     component_registry = ComponentRegistry()
-    component_registry.register_component(TitleComponent)
-    component_registry.register_component(ImageComponent)
-    component_registry.register_component(TextComponent)
-    component_registry.register_component(ButtonComponent)
+    component_registry.register_component(Title)
+    logger.debug("Registered Title component")
+    component_registry.register_component(Image)
+    logger.debug("Registered Image component")
+    component_registry.register_component(Text)
+    logger.debug("Registered Text component")
+    component_registry.register_component(Button)
+    logger.debug("Registered Button component")
 
 
 async def initialize_defaults():
     """Initialize all default data"""
     logger.info("Initializing default data...")
     await create_default_main_menu()
+    await register_default_components()
     await create_default_pages()
     await create_default_color_theme()
-    await register_default_components()
     logger.info("Default data initialization completed")
