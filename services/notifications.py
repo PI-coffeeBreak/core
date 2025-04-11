@@ -39,8 +39,8 @@ class NotificationService:
             Message.delivered == False,
             # Get notifications sent directly to the user or to any of their groups
             (
-                (Message.recipient_type == RecipientType.SINGLE) & (Message.recipient == user_id) |
-                (Message.recipient_type == RecipientType.GROUP) & (
+                (Message.recipient_type == RecipientType.UNICAST) & (Message.recipient == user_id) |
+                (Message.recipient_type == RecipientType.MULTICAST) & (
                     Message.recipient.in_(group_ids))
             )
         ).all()
