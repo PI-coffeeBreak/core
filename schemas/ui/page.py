@@ -23,6 +23,8 @@ class AddBaseComponentSchema(BaseModel):
 
 class PageSchema(BaseModel):
     title: str = Field(..., title="Page Title")
+    description: Optional[str] = Field(default=None, title="Page Description")
+    enabled: bool = Field(default=True, title="Is Page Enabled")
     components: List[AddBaseComponentSchema] = Field(default_factory=list)
 
     class Config:
@@ -36,6 +38,8 @@ class Page(BaseModel):
     page_id: Optional[str] = Field(
         default_factory=lambda: str(ObjectId()), title="Page ID")
     title: str = Field(..., title="Page Title")
+    description: Optional[str] = Field(default=None, title="Page Description")
+    enabled: bool = Field(default=True, title="Is Page Enabled")
     components: List[Dict[str, Any]] = Field(default_factory=list)
 
     class Config:
@@ -46,6 +50,8 @@ class Page(BaseModel):
 class PageResponse(BaseModel):
     page_id: str
     title: str
+    description: Optional[str]
+    enabled: bool
     components: List[BaseComponentSchema]
 
     class Config:

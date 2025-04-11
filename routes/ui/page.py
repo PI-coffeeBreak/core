@@ -18,7 +18,12 @@ async def create_page(page: page_schema.PageSchema, user_info: dict = Depends(ch
         {**c.dict(), "component_id": str(ObjectId())} for c in page.components
     ]
     page_id = await page_service.create_page(page.title, components_with_id)
-    return {"page_id": page_id, "title": page.title, "components": components_with_id}
+    return {"page_id": page_id,
+            "title": page.title,
+            "description": page.description,
+            "enabled": page.enabled,
+            "components": components_with_id
+    }
 
 
 @router.put("/{page_id}", response_model=page_schema.PageResponse, summary="Update an existing page")
@@ -28,7 +33,12 @@ async def update_page(page_id: str, page: page_schema.PageSchema, user_info: dic
     if not updated:
         logger.error("Failed to update page")
         raise HTTPException(status_code=404, detail="Error updating page")
-    return {"page_id": page_id, "title": page.title, "components": page.components}
+    return {"page_id": page_id,
+            "title": page.title,
+            "description": page.description,
+            "enabled": page.enabled,
+            "components": page.components
+    }
 
 
 @router.delete("/{page_id}", response_model=page_schema.DeletePageResponse, summary="Delete a page by its ID")
@@ -50,6 +60,8 @@ async def list_pages():
         {
             "page_id": page["id"],
             "title": page["title"],
+            "description": page["description"],
+            "enabled": page["enabled"],
             "components": page["components"]
         }
         for page in pages
@@ -66,6 +78,8 @@ async def get_page(page_id: str):
     return {
         "page_id": page["id"],
         "title": page["title"],
+        "description": page["description"],
+        "enabled": page["enabled"],
         "components": page["components"]
     }
 
