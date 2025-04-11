@@ -1,17 +1,18 @@
 from pydantic import BaseModel
 from enum import Enum
-from typing import List
+from typing import List, Dict, Union, Optional
 
 
 class RecipientType(str, Enum):
-    SINGLE = "SINGLE"
-    GROUP = "GROUP"
+    UNICAST = "UNICAST"
+    MULTICAST = "MULTICAST"
+    BROADCAST = "BROADCAST"
 
 
 class NotificationRequest(BaseModel):
     type: str
     recipient_type: RecipientType
-    recipient: str
+    recipient: Optional[str] = None  # Can be None for BROADCAST
     payload: str
     priority: int
 
