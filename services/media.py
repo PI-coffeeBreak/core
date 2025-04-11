@@ -8,6 +8,7 @@ from fastapi import HTTPException, UploadFile
 from models.media import Media
 from repository.media import BaseMediaRepo
 from dependencies.auth import get_current_user
+from constants.errors import MediaErrors
 
 
 class MediaService:
@@ -58,7 +59,7 @@ class MediaService:
             if size > media.max_size:
                 raise HTTPException(
                     status_code=400,
-                    detail=f"File exceeds maximum size of {media.max_size} bytes"
+                    detail=MediaErrors.FILE_TOO_LARGE.format(media.max_size)
                 )
 
         # Validate extension if valid_extensions is set
@@ -67,12 +68,13 @@ class MediaService:
             if not ext:
                 raise HTTPException(
                     status_code=400,
-                    detail="File has no extension"
+                    detail=MediaErrors.NO_EXTENSION
                 )
             if ext.lower() not in [ext.lower() for ext in media.valid_extensions]:
                 raise HTTPException(
                     status_code=400,
-                    detail=f"Invalid file extension. Allowed extensions: {', '.join(media.valid_extensions)}"
+                    detail=MediaErrors.INVALID_EXTENSION.format(
+                        ', '.join(media.valid_extensions))
                 )
 
     @classmethod
@@ -85,7 +87,8 @@ class MediaService:
         alias: Optional[str] = None
     ) -> Media:
         """
-        Register a new media entity
+        [INTERNAL USE ONLY]
+        Register a new media entity. This method should only be called by internal services.
 
         Args:
             db: Database session
@@ -130,14 +133,15 @@ class MediaService:
         """
         media = db.query(Media).filter(Media.uuid == uuid).first()
         if not media:
-            raise HTTPException(status_code=404, detail="Media not found")
+            raise HTTPException(status_code=404, detail=MediaErrors.NOT_FOUND)
 
         if media.hash is not None:
-            raise HTTPException(status_code=400, detail="Media already exists")
+            raise HTTPException(
+                status_code=400, detail=MediaErrors.ALREADY_EXISTS)
 
         if media.op_required and (not user or 'media_op' not in user.get('roles', [])):
             raise HTTPException(
-                status_code=403, detail="Operation requires media_op role")
+                status_code=403, detail=MediaErrors.REQUIRES_OP)
 
         # Validate file size and extension
         cls._validate_file(media, data, filename)
@@ -187,13 +191,13 @@ class MediaService:
         """
         media = db.query(Media).filter(Media.uuid == uuid).first()
         if not media or not media.hash:
-            raise HTTPException(status_code=404, detail="Media not found")
+            raise HTTPException(status_code=404, detail=MediaErrors.NOT_FOUND)
 
         try:
             data = cls._get_repository().read(media.hash)
             return media, data
         except FileNotFoundError:
-            raise HTTPException(status_code=404, detail="Media file not found")
+            raise HTTPException(status_code=404, detail=MediaErrors.NOT_FOUND)
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
 
@@ -217,15 +221,14 @@ class MediaService:
         """
         media = db.query(Media).filter(Media.uuid == uuid).first()
         if not media:
-            raise HTTPException(status_code=404, detail="Media not found")
+            raise HTTPException(status_code=404, detail=MediaErrors.NOT_FOUND)
 
         if not media.allow_rewrite:
-            raise HTTPException(
-                status_code=403, detail="Media does not allow rewrite")
+            raise HTTPException(status_code=403, detail=MediaErrors.NO_REWRITE)
 
         if media.op_required and (not user or 'media_op' not in user.get('roles', [])):
             raise HTTPException(
-                status_code=403, detail="Operation requires media_op role")
+                status_code=403, detail=MediaErrors.REQUIRES_OP)
 
         # Validate file size and extension
         cls._validate_file(media, data, filename)
@@ -288,15 +291,14 @@ class MediaService:
         """
         media = db.query(Media).filter(Media.uuid == uuid).first()
         if not media:
-            raise HTTPException(status_code=404, detail="Media not found")
+            raise HTTPException(status_code=404, detail=MediaErrors.NOT_FOUND)
 
         if not media.allow_rewrite:
-            raise HTTPException(
-                status_code=403, detail="Media does not allow deletion")
+            raise HTTPException(status_code=403, detail=MediaErrors.NO_DELETE)
 
         if media.op_required and (not user or 'media_op' not in user.get('roles', [])):
             raise HTTPException(
-                status_code=403, detail="Operation requires media_op role")
+                status_code=403, detail=MediaErrors.REQUIRES_OP)
 
         if media.hash:
             try:
@@ -312,7 +314,8 @@ class MediaService:
     @classmethod
     def unregister(cls, db: Session, uuid: str, force: bool = False) -> None:
         """
-        Unregister media entity
+        [INTERNAL USE ONLY]
+        Unregister media entity. This method should only be called by internal services.
 
         Args:
             db: Database session
@@ -324,11 +327,10 @@ class MediaService:
         """
         media = db.query(Media).filter(Media.uuid == uuid).first()
         if not media:
-            raise HTTPException(status_code=404, detail="Media not found")
+            raise HTTPException(status_code=404, detail=MediaErrors.NOT_FOUND)
 
         if media.hash and not force:
-            raise HTTPException(
-                status_code=400, detail="Cannot unregister media with existing file")
+            raise HTTPException(status_code=400, detail=MediaErrors.HAS_FILE)
 
         try:
             if media.hash:
