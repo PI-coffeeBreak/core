@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from . import users, activities, activity_types, auth, plugins, totp, notifications, media
+from . import users, activities, activity_types, auth, plugins, totp, notifications, media, event_info
 from .ui import color_themes, page, main_menu, plugin_settings
 from .components import router as components_router
 
@@ -7,6 +7,8 @@ from .components import router as components_router
 routes_app = APIRouter()
 
 # Include all routers
+routes_app.include_router(event_info.router,
+                          prefix="/event-info", tags=["Event Information"])
 routes_app.include_router(users.router, prefix="/users", tags=["Users"])
 routes_app.include_router(
     activities.router, prefix="/activities", tags=["Activities"])
