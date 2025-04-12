@@ -73,6 +73,8 @@ async def create_default_pages():
         # Create home page with Welcome component
         home_page = Page(
             title="Home",
+            description="Welcome to the home page",
+            enabled=True,
             components=[
                 {
                     "name": "Welcome"
@@ -85,6 +87,8 @@ async def create_default_pages():
         # Create profile page with UserProfile component
         profile_page = Page(
             title="Profile",
+            description="User profile page",
+            enabled=True,
             components=[
                 {
                     "name": "User Profile"
@@ -120,6 +124,8 @@ async def create_default_pages():
 
         activity_page = Page(
             title="Activity",
+            description="Activity page with multiple components",
+            enabled=True,
             components=[
                 title_component.model_dump(),
                 image_component.model_dump(),

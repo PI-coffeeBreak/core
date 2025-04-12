@@ -1,0 +1,11 @@
+class MediaErrors:
+    """Media service error messages"""
+    NOT_FOUND = "Media not found"
+    ALREADY_EXISTS = "Media already exists"
+    NO_EXTENSION = "File has no extension"
+    INVALID_EXTENSION = "Invalid file extension. Allowed extensions: {}"
+    FILE_TOO_LARGE = "File exceeds maximum size of {} bytes"
+    NO_REWRITE = "Media does not allow rewrite"
+    NO_DELETE = "Media does not allow deletion"
+    REQUIRES_OP = "Operation requires media_op role"
+    HAS_FILE = "Cannot unregister media with existing file"
