@@ -54,7 +54,7 @@ async def create_or_update_event(
         # Register media for image
         media = MediaService.register(
             db=db,
-            max_size=10 * 1024 * 1024,  # 10MB
+            max_size=50 * 1024 * 1024,  # 50MB
             allows_rewrite=True,
             valid_extensions=['.jpg', '.jpeg', '.png', '.gif', '.webp'],
             alias="event_image"
