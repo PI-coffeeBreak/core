@@ -1,6 +1,8 @@
 __pycache__/
 *.db
 
+# Media files
+media/
 
 ### macOS ###
 # General
