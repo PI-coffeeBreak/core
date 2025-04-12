@@ -35,11 +35,6 @@ def configure_swagger_ui(app):
         }
     }
 
-    # Add security requirement to all endpoints by default
-    app.openapi_schema["security"] = [
-        {"OAuth2PasswordBearer": []}
-    ]
-
     app.openapi = lambda: app.openapi_schema
 
     # Configure Swagger UI initialization

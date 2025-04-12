@@ -5,8 +5,9 @@ from enum import Enum as PyEnum
 
 
 class RecipientType(PyEnum):
-    SINGLE = "SINGLE"
-    GROUP = "GROUP"
+    UNICAST = "UNICAST"
+    MULTICAST = "MULTICAST"
+    BROADCAST = "BROADCAST"
 
 
 class Message(Base):
@@ -15,7 +16,7 @@ class Message(Base):
     id = Column(Integer, primary_key=True, index=True)
     type = Column(String, nullable=False)
     recipient_type = Column(SQLAlchemyEnum(RecipientType), nullable=False)
-    recipient = Column(String, nullable=False)
+    recipient = Column(String, nullable=True)  # Can be null for BROADCAST
     payload = Column(String, nullable=False)
     priority = Column(Integer, nullable=False)
     delivered = Column(Boolean, default=False)

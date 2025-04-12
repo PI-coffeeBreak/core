@@ -8,8 +8,42 @@ from schemas.ui.components.image import Image
 from schemas.ui.components.text import Text
 from schemas.ui.components.button import Button
 from services.component_registry import ComponentRegistry
+from services.media import MediaService
+from repository.media import LocalMediaRepo
+from models.media import Media
+import os
+from sqlalchemy.orm import Session
+from dependencies.database import get_db
 
 logger = logging.getLogger("coffeebreak")
+
+MEDIA_ROOT = os.path.join(os.path.dirname(__file__), 'media')
+MediaService.set_repository(lambda: LocalMediaRepo(MEDIA_ROOT))
+
+
+async def create_default_test_media(db: Session):
+    """Creates a default media entity for testing if it doesn't exist"""
+    try:
+        # Check if test media already exists
+        existing = db.query(Media).filter(Media.alias == 'test-image').first()
+        if existing:
+            logger.debug(
+                f"Test media already exists with UUID: {existing.uuid}")
+            return existing
+
+        # Register a media entity that only accepts images
+        media = MediaService.register(
+            db,
+            max_size=5 * 1024 * 1024,  # 5MB
+            allows_rewrite=True,
+            valid_extensions=['.jpg', '.jpeg', '.png', '.gif', '.webp'],
+            alias='test-image'
+        )
+        logger.debug(f"Created default test media with UUID: {media.uuid}")
+        return media
+    except Exception as e:
+        logger.error(f"Error creating default test media: {e}")
+        return None
 
 
 async def create_default_main_menu():
@@ -131,6 +165,7 @@ async def create_default_color_theme():
         )
         await color_themes_collection.insert_one(default_color_theme.model_dump())
 
+
 async def register_default_components():
     """Register default components"""
     component_registry = ComponentRegistry()
@@ -147,6 +182,12 @@ async def register_default_components():
 async def initialize_defaults():
     """Initialize all default data"""
     logger.info("Initializing default data...")
+
+    # Initialize SQL defaults
+    db = next(get_db())
+    await create_default_test_media(db)
+
+    # Initialize MongoDB defaults
     await create_default_main_menu()
     await register_default_components()
     await create_default_pages()

@@ -1,4 +1,13 @@
+import requests
+import sys
+import logging
+import os
+from fastapi.security import OAuth2PasswordBearer
+from fastapi import Depends, HTTPException
+from keycloak import KeycloakAdmin, KeycloakOpenID
 from keycloak import connection
+
+
 def custom_urljoin(a, b):
     # If 'a' ends with a slash and 'b' starts with one, remove one slash
     if a.endswith('/') and b.startswith('/'):
@@ -12,14 +21,9 @@ def custom_urljoin(a, b):
     # If neither ends or starts with a slash, add one between them
     else:
         return a + '/' + b
+
+
 connection.urljoin = custom_urljoin
-from keycloak import KeycloakAdmin, KeycloakOpenID
-from fastapi import Depends, HTTPException
-from fastapi.security import OAuth2PasswordBearer
-import os
-import logging
-import sys
-import requests
 
 logger = logging.getLogger("coffeebreak.core")
 
@@ -54,17 +58,44 @@ keycloak_admin = KeycloakAdmin(
     verify=False
 )
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/token")
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl="/api/v1/token", auto_error=False)
 
-def get_current_user(token: str = Depends(oauth2_scheme)):
-    """Verifica e retorna informações do usuário autenticado no Keycloak"""
+
+def get_current_user(token: str = Depends(oauth2_scheme), force_auth: bool = True):
     try:
-        user_info = keycloak_openid.introspect(token)
-        if not user_info.get("active"):
+        if not token and not force_auth:
+            return None
+
+        if not token and force_auth:
+            raise HTTPException(status_code=401, detail="Not authenticated")
+
+        # Primeiro tenta decodificar o token
+        try:
+            token_info = keycloak_openid.decode_token(
+                token,
+                key=keycloak_openid.public_key(),
+                options={"verify_signature": True,
+                         "verify_aud": True, "exp": True}
+            )
+            return token_info
+        except Exception as decode_error:
+            logger.warning(f"Failed to decode token: {str(decode_error)}")
+            # Se falhar na decodificação, tenta introspection
+            user_info = keycloak_openid.introspect(token)
+            if not user_info.get("active"):
+                if force_auth:
+                    raise HTTPException(
+                        status_code=401, detail="Invalid token")
+                return None
+            return user_info
+
+    except Exception as e:
+        logger.error(f"Authentication error: {str(e)}")
+        if force_auth:
             raise HTTPException(status_code=401, detail="Invalid token")
-        return user_info
-    except Exception:
-        raise HTTPException(status_code=401, detail="Invalid token")
+        return None
+
 
 def check_role(required_roles: list):
     """Verifica se o usuário possui pelo menos um dos papéis necessários"""
