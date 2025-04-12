@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Request
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
-from typing import Optional
+from fastapi.responses import RedirectResponse
 
 from dependencies.database import get_db
 from dependencies.auth import check_role
@@ -66,3 +66,22 @@ async def create_or_update_event(
         db.commit()
         db.refresh(db_event)
         return EventInfo.model_validate(db_event)
+
+
+@router.get("/event/image", summary="Get current event image")
+async def get_event_image(
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    """
+    Get the current event image.
+    This is an alias for /media/<image_id> that automatically redirects to the current event's image.
+    """
+    event = db.query(EventInfoModel).first()
+    if not event or not event.image_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No event image found"
+        )
+
+    return RedirectResponse(url=f"/media/{event.image_id}")
