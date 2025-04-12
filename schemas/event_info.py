@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 class EventInfoBase(BaseModel):
     """
@@ -29,3 +29,14 @@ class EventInfo(EventInfoBase):
     class Config:
         from_attributes = True
         arbitrary_types_allowed = True
+
+class ImageUploadParams(BaseModel):
+    """Parameters for image upload"""
+    max_size: int = Field(
+        default=10 * 1024 * 1024,  # 10MB
+        description="Maximum file size in bytes"
+    )
+    allowed_extensions: list[str] = Field(
+        default=['.jpg', '.jpeg', '.png', '.gif', '.webp'],
+        description="List of allowed file extensions"
+    )

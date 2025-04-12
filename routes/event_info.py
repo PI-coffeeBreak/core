@@ -5,7 +5,7 @@ from typing import Optional
 from dependencies.database import get_db
 from dependencies.auth import check_role
 from models.event_info import Event as EventInfoModel
-from schemas.event_info import EventInfo, EventInfoCreate, EventInfoBase
+from schemas.event_info import EventInfo, EventInfoCreate, EventInfoBase, ImageUploadParams
 from services.media import MediaService
 
 router = APIRouter()
@@ -76,10 +76,11 @@ async def create_or_update_event(
         
         return response
 
-@router.post("/event/image", response_model=EventInfo, summary="Upload event image")
+@router.post("/event/image", response_model=EventInfo)
 async def upload_event_image(
     request: Request,
     file: UploadFile = File(...),
+    params: ImageUploadParams = Depends(),
     db: Session = Depends(get_db),
     user_info: dict = Depends(check_role(["admin", "events_manager"]))
 ):
@@ -94,33 +95,23 @@ async def upload_event_image(
             detail="No event found. Create event first."
         )
     
-    # If there's already an image, prepare to replace it
-    if event.image_id:
-        # Use the existing media UUID
-        media_uuid = event.image_id
-        
-        # Update the existing media
-        MediaService.create_or_replace(db, media_uuid, file.file, file.filename)
-    else:
-        # Register new media with acceptable image extensions
-        media = MediaService.register(
-            db,
-            max_size=10 * 1024 * 1024,  # 10MB limit
-            allows_rewrite=True,
-            valid_extensions=['.jpg', '.jpeg', '.png', '.gif', '.webp'],
-            alias=file.filename
+    # Use the existing media UUID
+    media_uuid = event.image_id
+    
+    # Validate file size and extension
+    if file.size > params.max_size:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"File size exceeds the maximum allowed size of {params.max_size} bytes."
         )
-        
-        # Store the media UUID
-        media_uuid = media.uuid
-        
-        # Create the actual media content
-        MediaService.create(db, media_uuid, file.file, file.filename)
-        
-        # Update the event with the new media UUID
-        event.image_id = media_uuid
-        db.commit()
-        db.refresh(event)
+    if not any(file.filename.endswith(ext) for ext in params.allowed_extensions):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"File extension not allowed. Allowed extensions: {params.allowed_extensions}."
+        )
+    
+    # Update the existing media
+    MediaService.create_or_replace(db, media_uuid, file.file, file.filename)
     
     # Create response with image URL
     response = EventInfo.model_validate(event)
