@@ -11,7 +11,7 @@ router = APIRouter()
 
 @router.get("/in-app", response_model=List[NotificationResponse])
 async def get_in_app_notifications(
-    userdata: dict = Depends(get_current_user),
+    userdata: dict = Depends(get_current_user()),
     db: Session = Depends(get_db)
 ):
     """
