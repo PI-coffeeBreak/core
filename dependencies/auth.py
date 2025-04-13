@@ -6,7 +6,7 @@ from fastapi.security import OAuth2PasswordBearer
 from fastapi import Depends, HTTPException
 from keycloak import KeycloakAdmin, KeycloakOpenID
 from keycloak import connection
-
+from keycloak.exceptions import RoleNotFoundException
 
 def custom_urljoin(a, b):
     # If 'a' ends with a slash and 'b' starts with one, remove one slash

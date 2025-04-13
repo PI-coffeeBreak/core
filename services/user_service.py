@@ -2,6 +2,7 @@ from typing import List
 from dependencies.auth import keycloak_admin, assign_role
 from fastapi import HTTPException
 import asyncio
+from keycloak.exceptions import KeycloakError
 
 async def list_users() -> List[dict]:
     try:
