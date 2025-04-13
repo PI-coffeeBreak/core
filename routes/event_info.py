@@ -31,9 +31,6 @@ async def create_event_first_time(
     if existing_event:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Event already exists")
 
-    if not event.first_user_id:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="First user ID is required")
-
     media = MediaService.register(
         db=db,
         max_size=50 * 1024 * 1024,
@@ -51,7 +48,6 @@ async def create_event_first_time(
     await assign_role_to_user(event.first_user_id, "cb-organizer")
 
     return EventInfo.model_validate(db_event)
-
 
 @router.post("/event/admin", response_model=EventInfo, status_code=status.HTTP_201_CREATED, summary="Create or update event information (admin only)")
 async def create_or_update_event_admin(
