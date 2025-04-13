@@ -20,6 +20,11 @@ class EventInfoCreate(EventInfoBase):
     """
     pass
 
+class EventInfoCreateFirstUser(EventInfoBase):
+    """
+    Schema for creating new event information with first user ID
+    """
+    first_user_id: Optional[str] = None 
 
 class EventInfo(EventInfoBase):
     """

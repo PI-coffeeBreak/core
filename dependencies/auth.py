@@ -105,3 +105,25 @@ def check_role(required_roles: list):
             raise HTTPException(status_code=403, detail="Access denied")
         return user_info
     return role_verifier
+
+def assign_role(user_id: str, role_name: str):
+    """
+    Assign a realm-level role to a user in Keycloak.
+    Creates the role if it doesn't exist.
+    """
+    try:
+        try:
+            role = keycloak_admin.get_realm_role(role_name)
+        except Exception as e:
+            if "Could not find role" in str(e):
+                logger.warning(f"Role '{role_name}' não encontrado. Criando...")
+                keycloak_admin.create_realm_role({"name": role_name})
+                role = keycloak_admin.get_realm_role(role_name)
+            else:
+                raise
+        keycloak_admin.assign_realm_roles(user_id=user_id, roles=[role])
+        logger.info(f"Assigned role '{role_name}' to user '{user_id}'")
+
+    except Exception as e:
+        logger.error(f"Failed to assign role {role_name} to user {user_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to assign role: {str(e)}")
