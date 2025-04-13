@@ -89,6 +89,9 @@ async def get_event_image(
     request: Request,
     db: Session = Depends(get_db)
 ):
+    """
+    Get the current event image.
+    """
     event = db.query(EventInfoModel).first()
     if not event or not event.image_id:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No event image found")
