@@ -2,7 +2,6 @@ from typing import List
 from dependencies.auth import keycloak_admin, assign_role
 from fastapi import HTTPException
 import asyncio
-from keycloak.exceptions import KeycloakError
 
 async def list_users() -> List[dict]:
     try:
@@ -86,10 +85,4 @@ async def assign_role_to_user(user_id: str, role_name: str):
         await asyncio.to_thread(assign_role, user_id=user_id, role_name=role_name)
     except ValueError as ve:
         raise HTTPException(
-            status_code=400, detail=f"Invalid input: {str(ve)}")
-    except KeycloakError as ke:
-        raise HTTPException(
-            status_code=500, detail=f"Keycloak error: {str(ke)}")
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"An unexpected error occurred: {str(e)}")
+            status_code=500, detail=f"Failed to assign role: {str(ve)}")
