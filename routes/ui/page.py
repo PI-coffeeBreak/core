@@ -17,12 +17,18 @@ async def create_page(page: page_schema.PageSchema, user_info: dict = Depends(ch
     components_with_id = [
         {**c.dict(), "component_id": str(ObjectId())} for c in page.components
     ]
-    page_id = await page_service.create_page(page.title, components_with_id)
-    return {"page_id": page_id,
-            "title": page.title,
-            "description": page.description,
-            "enabled": page.enabled,
-            "components": components_with_id
+    page_id = await page_service.create_page(
+        title=page.title,
+        description=page.description,
+        enabled=page.enabled,
+        components=components_with_id
+    )
+    return {
+        "page_id": page_id,
+        "title": page.title,
+        "description": page.description,
+        "enabled": page.enabled,
+        "components": components_with_id
     }
 
 
@@ -38,7 +44,7 @@ async def update_page(page_id: str, page: page_schema.PageSchema, user_info: dic
             "description": page.description,
             "enabled": page.enabled,
             "components": page.components
-    }
+            }
 
 
 @router.delete("/{page_id}", response_model=page_schema.DeletePageResponse, summary="Delete a page by its ID")
@@ -83,6 +89,7 @@ async def get_page(page_id: str):
         "components": page["components"]
     }
 
+
 @router.post("/{page_id}/components", response_model=page_schema.BaseComponentSchema, summary="Add a new component to the page")
 async def add_component(page_id: str, component: page_schema.AddBaseComponentSchema, user_info: dict = Depends(check_role(["customization"]))):
     component_dict = component.dict()
@@ -107,3 +114,36 @@ async def update_component(page_id: str, component_id: str, updated_component: p
     if not updated:
         raise HTTPException(status_code=404, detail="Error updating component")
     return {"component_id": component_id, "name": updated_component.name}
+
+
+@router.patch("/{page_id}", response_model=page_schema.PageResponse)
+async def patch_page(
+    page_id: str,
+    page: page_schema.PagePatchSchema,
+    user_info: dict = Depends(check_role(["customization"]))
+):
+    """Update specific fields of a page."""
+    logger.debug(f"Patching page {page_id}")
+
+    current_page = await page_service.get_page(page_id)
+    if not current_page:
+        raise HTTPException(status_code=404, detail="Page not found")
+
+    updated = await page_service.update_page(
+        page_id,
+        page.title if page.title is not None else current_page["title"],
+        page.components if page.components is not None else current_page["components"],
+        enabled=page.enabled if page.enabled is not None else current_page["enabled"]
+    )
+
+    if not updated:
+        raise HTTPException(status_code=404, detail="Error updating page")
+
+    updated_page = await page_service.get_page(page_id)
+    return {
+        "page_id": updated_page["id"],
+        "title": updated_page["title"],
+        "description": updated_page["description"],
+        "enabled": updated_page["enabled"],
+        "components": updated_page["components"]
+    }

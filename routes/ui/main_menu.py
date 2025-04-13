@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from typing import List
-from schemas.ui.menu import Menu, MenuOption
+from schemas.ui.menu import Menu, MenuOption, MenuOptionCreate
 from dependencies.mongodb import db
 from dependencies.auth import check_role
 from services.ui.main_menu import create_menu_option, remove_menu_option
@@ -19,7 +19,7 @@ async def get_main_menu():
 
 
 @router.post("/option", response_model=Menu, dependencies=[Depends(check_role(["customization"]))])
-async def add_menu_option(option: MenuOption):
+async def add_menu_option(option: MenuOptionCreate):
     return await create_menu_option(option.icon, option.label, option.href)
 
 
@@ -62,3 +62,8 @@ async def update_menu_options(options: List[MenuOption]):
         raise HTTPException(
             status_code=500, detail="Failed to update menu options")
     return main_menu
+
+
+@router.delete("/option/by-href/{href}")
+async def delete_menu_option_by_href(href: str):
+    return await remove_menu_option_by_href(href)

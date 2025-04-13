@@ -75,11 +75,7 @@ async def create_default_pages():
             title="Home",
             description="Welcome to the home page",
             enabled=True,
-            components=[
-                {
-                    "name": "Welcome"
-                }
-            ]
+            components=[]
         )
         await pages_collection.insert_one(home_page.model_dump())
         logger.debug(f"Created default home page: {home_page}")
@@ -112,7 +108,7 @@ async def create_default_pages():
 
         text_component = Text(
             name="Text",
-            content="This is a page for activities. skfl df jf kdf ddfh d jkfsj fdshf dj fds jdfh kjfhdsjkhf sh fjds jkh hjk dj dkj sjkf jskd dh fdsjk fkjsh sdh sjk kfsj hkjsdh fkshh fds fhdfsjfkfdhf fsdjhf sjhf dj ksdhsjd kjh fdfhkjjhfdskjf d jfdsjf dsjf jfkkdh sjfh jhf shhf jsh jsf hsjfh jkd jh jshh kjdshjsh fkshf sjkd fkshh jdh fks sj skh fjs sh jks ksdh fjksd jshh fkjhf sjdh shf js kj dhs fkjf hf sdkj kjs dfh"
+            text="This is a page for activities. skfl df jf kdf ddfh d jkfsj fdshf dj fds jdfh kjfhdsjkhf sh fjds jkh hjk dj dkj sjkf jskd dh fdsjk fkjsh sdh sjk kfsj hkjsdh fkshh fds fhdfsjfkfdhf fsdjhf sjhf dj ksdhsjd kjh fdfhkjjhfdskjf d jfdsjf dsjf jfkkdh sjfh jhf shhf jsh jsf hsjfh jkd jh jshh kjdshjsh fkshf sjkd fkshh jdh fks sj skh fjs sh jks ksdh fjksd jshh fkjhf sjdh shf js kj dhs fkjf hf sdkj kjs dfh"
         )
 
         button_component = Button(

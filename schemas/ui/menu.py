@@ -3,6 +3,12 @@ from typing import List
 from uuid import uuid4
 
 
+class MenuOptionCreate(BaseModel):
+    icon: str
+    label: str
+    href: str
+
+
 class MenuOption(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid4()))
     icon: str
