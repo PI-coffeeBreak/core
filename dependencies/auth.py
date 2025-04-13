@@ -6,7 +6,7 @@ from fastapi.security import OAuth2PasswordBearer
 from fastapi import Depends, HTTPException
 from keycloak import KeycloakAdmin, KeycloakOpenID
 from keycloak import connection
-from keycloak.exceptions import RoleNotFoundException
+from keycloak.exceptions import KeycloakError
 
 def custom_urljoin(a, b):
     # If 'a' ends with a slash and 'b' starts with one, remove one slash
@@ -114,7 +114,7 @@ def assign_role(user_id: str, role_name: str):
     try:
         try:
             role = keycloak_admin.get_realm_role(role_name)
-        except RoleNotFoundException:
+        except KeycloakError as e:
             logger.warning(f"Role '{role_name}' not found. Creating...")
             keycloak_admin.create_realm_role({"name": role_name})
             role = keycloak_admin.get_realm_role(role_name)
