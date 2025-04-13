@@ -82,7 +82,7 @@ async def delete_user(user_id: str) -> dict:
 
 async def assign_role_to_user(user_id: str, role_name: str):
     try:
-        assign_role(user_id=user_id, role_name=role_name)
+        await asyncio.to_thread(assign_role, user_id=user_id, role_name=role_name)
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Failed to assign role: {str(e)}")
