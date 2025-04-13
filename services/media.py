@@ -88,7 +88,7 @@ class MediaService:
     ) -> Media:
         """
         Not called by any endpoint. Should be called where needed.
-        Register a new media entity, i.e, only the metadata not the file itself.
+        Register a new media entity, i.e., only the metadata, not the file itself.
 
         Args:
             db: Database session
