@@ -1,7 +1,7 @@
 from typing import List
-from dependencies.auth import keycloak_admin
+from dependencies.auth import keycloak_admin, assign_role
 from fastapi import HTTPException
-
+import asyncio
 
 async def list_users() -> List[dict]:
     try:
@@ -78,3 +78,11 @@ async def delete_user(user_id: str) -> dict:
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Failed to delete user: {str(e)}")
+
+
+async def assign_role_to_user(user_id: str, role_name: str):
+    try:
+        await asyncio.to_thread(assign_role, user_id=user_id, role_name=role_name)
+    except ValueError as ve:
+        raise HTTPException(
+            status_code=500, detail=f"Failed to assign role: {str(ve)}")
