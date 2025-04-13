@@ -16,20 +16,22 @@ router = APIRouter()
 async def get_event(request: Request, db: Session = Depends(get_db)):
     event = db.query(EventInfoModel).first()
     if not event:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No event information found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="No event information found")
 
     return EventInfo.model_validate(event)
 
 
-@router.post("/event", response_model=EventInfo, status_code=status.HTTP_201_CREATED, summary="Create or update event information (public, one-time)")
-async def create_event_first_time(
+@router.post("/event", response_model=EventInfo, status_code=status.HTTP_201_CREATED, summary="Create event information (public, one-time)")
+async def create_event(
     event: EventInfoCreateFirstUser,
     request: Request,
     db: Session = Depends(get_db)
 ):
     existing_event = db.query(EventInfoModel).first()
     if existing_event:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Event already exists")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Event already exists")
 
     media = MediaService.register(
         db=db,
@@ -39,7 +41,8 @@ async def create_event_first_time(
         alias="event_image"
     )
 
-    db_event = EventInfoModel(**event.model_dump(exclude={"first_user_id"}), image_id=media.uuid)
+    db_event = EventInfoModel(
+        **event.model_dump(exclude={"first_user_id"}), image_id=media.uuid)
     db.add(db_event)
     db.commit()
     db.refresh(db_event)
@@ -49,7 +52,8 @@ async def create_event_first_time(
 
     return EventInfo.model_validate(db_event)
 
-@router.post("/event/admin", response_model=EventInfo, status_code=status.HTTP_201_CREATED, summary="Create or update event information (admin only)")
+
+@router.put("/event", response_model=EventInfo, status_code=status.HTTP_201_CREATED, summary="Create or update event information (admin only)")
 async def create_or_update_event_admin(
     request: Request,
     event: EventInfoCreate,
@@ -73,7 +77,8 @@ async def create_or_update_event_admin(
         alias="event_image"
     )
 
-    db_event = EventInfoModel(**event.model_dump(exclude={"first_user_id"}), image_id=media.uuid)
+    db_event = EventInfoModel(
+        **event.model_dump(exclude={"first_user_id"}), image_id=media.uuid)
     db.add(db_event)
     db.commit()
     db.refresh(db_event)
@@ -90,6 +95,7 @@ async def get_event_image(
     """
     event = db.query(EventInfoModel).first()
     if not event or not event.image_id:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No event image found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="No event image found")
 
     return RedirectResponse(url=f"/media/{event.image_id}")
