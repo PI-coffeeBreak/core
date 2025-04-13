@@ -87,8 +87,8 @@ class MediaService:
         alias: Optional[str] = None
     ) -> Media:
         """
-        [INTERNAL USE ONLY]
-        Register a new media entity. This method should only be called by internal services.
+        Not called by any endpoint. Should be called where needed.
+        Register a new media entity, i.e, only the metadata not the file itself.
 
         Args:
             db: Database session
@@ -116,7 +116,7 @@ class MediaService:
     @classmethod
     def create(cls, db: Session, uuid: str, data: BinaryIO, filename: str, user: Optional[dict] = None) -> Media:
         """
-        Create new media file
+        Create the new media file itself and save it to the repository.
 
         Args:
             db: Database session
@@ -204,7 +204,8 @@ class MediaService:
     @classmethod
     def create_or_replace(cls, db: Session, uuid: str, data: BinaryIO, filename: str, user: Optional[dict] = None) -> Media:
         """
-        Create or replace media file
+        Create or replace the media file itself and save it to the repository.
+        Similar to create, but allows replacing existing files.
 
         Args:
             db: Database session
@@ -279,7 +280,8 @@ class MediaService:
     @classmethod
     def remove(cls, db: Session, uuid: str, user: Optional[dict] = None) -> None:
         """
-        Remove media file
+        Remove the media file itself from the repository.
+        This does not delete the media entity from the database.
 
         Args:
             db: Database session
@@ -314,8 +316,8 @@ class MediaService:
     @classmethod
     def unregister(cls, db: Session, uuid: str, force: bool = False) -> None:
         """
-        [INTERNAL USE ONLY]
-        Unregister media entity. This method should only be called by internal services.
+        Also not available in an endpoint. Should be called where needed.
+        Unregister a media entity from the database and its file if it exists, i.e., delete the metadata and the file itself.
 
         Args:
             db: Database session
