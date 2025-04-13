@@ -116,7 +116,7 @@ def assign_role(user_id: str, role_name: str):
             role = keycloak_admin.get_realm_role(role_name)
         except Exception as e:
             if "Could not find role" in str(e):
-                logger.warning(f"Role '{role_name}' não encontrado. Criando...")
+                logger.warning(f"Role '{role_name}' not found. Creating...")
                 keycloak_admin.create_realm_role({"name": role_name})
                 role = keycloak_admin.get_realm_role(role_name)
             else:
