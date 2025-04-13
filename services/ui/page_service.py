@@ -1,3 +1,4 @@
+from utils.mongoserializer import to_object_id, from_mongo
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from bson import ObjectId
 from typing import List, Dict
@@ -6,7 +7,6 @@ import logging
 
 logger = logging.getLogger("coffeebreak.core")
 
-from utils.mongoserializer import to_object_id, from_mongo
 
 class PageService:
     def __init__(self, db: AsyncIOMotorDatabase):
@@ -14,22 +14,33 @@ class PageService:
         logger.debug(
             f"Initialized PageService with collection: {self.collection.name}")
 
-    async def create_page(self, title: str, components: List[Dict]) -> str:
+    async def create_page(self, title: str, description: str = "", enabled: bool = True, components: List[Dict] = None) -> str:
+        components = components or []
         for component in components:
             component['component_id'] = str(ObjectId())
 
-        new_page = {"title": title, "components": components}
+        new_page = {
+            "title": title,
+            "description": description,
+            "enabled": enabled,
+            "components": components
+        }
         result = await self.collection.insert_one(new_page)
         logger.debug(f"Created new page with ID: {result.inserted_id}")
         return str(result.inserted_id)
 
-    async def update_page(self, page_id: str, title: str, components: List[Dict]) -> bool:
+    async def update_page(self, page_id: str, title: str, components: List[Dict], enabled: bool = None) -> bool:
         for component in components:
             if 'component_id' not in component:
                 component['component_id'] = str(ObjectId())
+
+        update_data = {"title": title, "components": components}
+        if enabled is not None:
+            update_data["enabled"] = enabled
+
         result = await self.collection.update_one(
             {"_id": to_object_id(page_id)},
-            {"$set": {"title": title, "components": components}}
+            {"$set": update_data}
         )
         logger.debug(
             f"Updated page {page_id}, modified count: {result.modified_count}")
@@ -80,7 +91,8 @@ class PageService:
 
     async def update_component(self, page_id: str, component_id: str, updated_component: Dict) -> bool:
         result = await self.collection.update_one(
-            {"_id": to_object_id(page_id), "components.component_id": component_id},
+            {"_id": to_object_id(page_id),
+             "components.component_id": component_id},
             {"$set": {"components.$": updated_component}}
         )
         logger.debug(

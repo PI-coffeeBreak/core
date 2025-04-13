@@ -74,3 +74,11 @@ class RemoveComponentResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class PagePatchSchema(BaseModel):
+    """Schema for PATCH operations where all fields are optional."""
+    title: Optional[str] = None
+    description: Optional[str] = None
+    enabled: Optional[bool] = None
+    components: Optional[List[Dict[str, Any]]] = None

@@ -11,9 +11,10 @@ class Text(BaseComponentSchema):
         content (str): The text content to be displayed
     """
     text: str = Field(..., description="The text content to be displayed")
-    color: str = Field(
+    color: TextColor = Field(
         default=TextColor.PRIMARY_CONTENT,
         description="Text color of the text",
+        enum=[color.value for color in TextColor],
         optional=True
     )
     italic: bool = Field(
