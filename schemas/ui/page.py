@@ -7,6 +7,10 @@ class BaseComponentSchema(BaseModel):
     name: str = Field(..., title="Component Name")
     component_id: Optional[str] = Field(
         default_factory=lambda: str(ObjectId()), title="Component ID")
+    require_auth: bool = Field(
+        default=False, title="Requires Authentication",
+        description="Whether the component should require user authentication"
+    )
 
     class Config:
         from_attributes = True
