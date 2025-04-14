@@ -1,15 +1,24 @@
-from fastapi import APIRouter, Depends, UploadFile, File, Response
+from fastapi import APIRouter, Depends, UploadFile, File, Response, HTTPException
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from typing import Optional
 import magic
 
 from dependencies.database import get_db
-from dependencies.auth import get_current_user
+from dependencies.auth import get_current_user, check_role
 from services.media import MediaService
 from schemas.media import MediaResponse
 
 router = APIRouter()
+
+
+@router.post("/register", response_model=MediaResponse)
+async def register_media(
+    db: Session = Depends(get_db),
+    user: Optional[dict] = Depends(check_role(['customization']))
+):
+    """Register a new media object before upload"""
+    return MediaService.register(db)
 
 
 @router.post("/{uuid}", response_model=MediaResponse)

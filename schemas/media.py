@@ -30,3 +30,13 @@ class MediaResponse(MediaBase):
     class Config:
         """Configure Pydantic to read data from ORM"""
         from_attributes = True
+
+
+class Media(BaseModel):
+    """
+    Schema that represents a media reference through its UUID
+    """
+    uuid: str = Field(..., description="The UUID of the media")
+
+    def __str__(self) -> str:
+        return self.uuid
