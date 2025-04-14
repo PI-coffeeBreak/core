@@ -12,8 +12,8 @@ class Title(BaseComponentSchema):
         className (str): CSS classes to be applied
     """
     text: str = Field(..., description="The text to be displayed")
-    color: str = Field(
-        default=Color.PRIMARY_CONTENT.value,
+    color: Color = Field(
+        default=Color.PRIMARY_CONTENT,
         description="Text color of the title",
         enum=[color.value for color in Color],
         optional=True
