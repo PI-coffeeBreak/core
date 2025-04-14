@@ -1,5 +1,7 @@
+from typing import Union
 from pydantic import Field
 from schemas.ui.page import BaseComponentSchema
+from schemas.media import Media
 
 
 class Image(BaseComponentSchema):
@@ -7,10 +9,11 @@ class Image(BaseComponentSchema):
     Schema for Image component
 
     Attributes:
-        src (str): The source URL of the image
+        src (Union[str, Media]): The source URL of the image (can be an external URL or a Media reference)
         alt (str): Alternative text for the image
     """
-    src: str = Field(..., description="The source URL of the image")
+    src: Union[str, Media] = Field(
+        ..., description="The source URL of the image (can be an external URL or a Media reference)")
     alt: str = Field(..., description="Alternative text for the image")
     className: str = Field(
         default="",
