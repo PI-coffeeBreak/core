@@ -1,13 +1,15 @@
 from pydantic import Field
 from schemas.ui.page import BaseComponentSchema
-from schemas.ui.color import BackgroundColor, TextColor
+from schemas.ui.color import Color
 from enum import Enum
+
 
 class HTTPMethod(str, Enum):
     GET = "GET"
     POST = "POST"
     PUT = "PUT"
     DELETE = "DELETE"
+
 
 class Button(BaseComponentSchema):
     """
@@ -35,14 +37,17 @@ class Button(BaseComponentSchema):
         description="CSS classes to be applied",
         optional=True
     )
-    backgroundColor: BackgroundColor = Field(
-        default=BackgroundColor.PRIMARY,
+    backgroundColor: str = Field(
+        default=Color.PRIMARY.value,
         description="Background color of the button",
+        enum=[color.value for color in Color if not color.value.endswith(
+            "-content")],
         optional=True
     )
-    textColor: TextColor = Field(
-        default=TextColor.PRIMARY_CONTENT,
+    textColor: str = Field(
+        default=Color.PRIMARY_CONTENT.value,
         description="Text color of the button",
+        enum=[color.value for color in Color],
         optional=True
     )
     disabled: bool = Field(
