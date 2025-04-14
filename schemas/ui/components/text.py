@@ -1,6 +1,6 @@
 from pydantic import Field
 from schemas.ui.page import BaseComponentSchema
-from schemas.ui.color import TextColor
+from schemas.ui.color import Color
 
 
 class Text(BaseComponentSchema):
@@ -11,10 +11,10 @@ class Text(BaseComponentSchema):
         content (str): The text content to be displayed
     """
     text: str = Field(..., description="The text content to be displayed")
-    color: TextColor = Field(
-        default=TextColor.PRIMARY_CONTENT,
+    color: Color = Field(
+        default=Color.PRIMARY_CONTENT,
         description="Text color of the text",
-        enum=[color.value for color in TextColor],
+        enum=[color.value for color in Color],
         optional=True
     )
     italic: bool = Field(
