@@ -1,7 +1,6 @@
 from pydantic import Field
 from schemas.ui.page import BaseComponentSchema
-from schemas.ui.color import TextColor
-from enum import Enum
+from schemas.ui.color import Color
 
 
 class Title(BaseComponentSchema):
@@ -13,10 +12,10 @@ class Title(BaseComponentSchema):
         className (str): CSS classes to be applied
     """
     text: str = Field(..., description="The text to be displayed")
-    color: str = Field(
-        default=TextColor.PRIMARY_CONTENT.value,
+    color: Color = Field(
+        default=Color.PRIMARY_CONTENT,
         description="Text color of the title",
-        enum=[color.value for color in TextColor],
+        enum=[color.value for color in Color],
         optional=True
     )
     italic: bool = Field(

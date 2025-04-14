@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Literal
 from bson import ObjectId
 
 
@@ -7,7 +7,7 @@ class BaseComponentSchema(BaseModel):
     name: str = Field(..., title="Component Name")
     component_id: Optional[str] = Field(
         default_factory=lambda: str(ObjectId()), title="Component ID")
-    require_auth: bool = Field(
+    require_auth: Literal[False] = Field(
         default=False, title="Requires Authentication",
         description="Whether the component should require user authentication"
     )

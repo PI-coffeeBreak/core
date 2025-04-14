@@ -1,51 +1,30 @@
 from enum import Enum
 
+
 class Color(str, Enum):
+    """Enum for DaisyUI theme colors"""
+    # Base colors
+    BASE_100 = "base-100"
+    BASE_200 = "base-200"
+    BASE_300 = "base-300"
+    BASE_CONTENT = "base-content"
+
+    # Main theme colors
     PRIMARY = "primary"
+    PRIMARY_CONTENT = "primary-content"
     SECONDARY = "secondary"
-    SUCCESS = "success"
-    DANGER = "danger"
-    WARNING = "warning"
+    SECONDARY_CONTENT = "secondary-content"
+    ACCENT = "accent"
+    ACCENT_CONTENT = "accent-content"
+    NEUTRAL = "neutral"
+    NEUTRAL_CONTENT = "neutral-content"
+
+    # State colors
     INFO = "info"
-
-class BackgroundColor(str, Enum):
-    """Enum for background colors"""
-    PRIMARY = "bg-primary"
-    SECONDARY = "bg-secondary"
-    SUCCESS = "bg-success"
-    DANGER = "bg-danger"
-    WARNING = "bg-warning"
-    INFO = "bg-info"
-
-class TextColor(str, Enum):
-    """Enum for text colors, including content colors"""
-    PRIMARY = "text-primary"
-    PRIMARY_CONTENT = "text-primary-content"
-    SECONDARY = "text-secondary"
-    SECONDARY_CONTENT = "text-secondary-content"
-    SUCCESS = "text-success"
-    SUCCESS_CONTENT = "text-success-content"
-    DANGER = "text-danger"
-    DANGER_CONTENT = "text-danger-content"
-    WARNING = "text-warning"
-    WARNING_CONTENT = "text-warning-content"
-    INFO = "text-info"
-    INFO_CONTENT = "text-info-content"
-
-class BorderColor(str, Enum):
-    """Enum for border colors"""
-    PRIMARY = "border-primary"
-    SECONDARY = "border-secondary"
-    SUCCESS = "border-success"
-    DANGER = "border-danger"
-    WARNING = "border-warning"
-    INFO = "border-info"
-
-class ContentColor(str, Enum):
-    """Enum for content colors (text on top of backgrounds)"""
-    PRIMARY = "text-primary-content"
-    SECONDARY = "text-secondary-content"
-    SUCCESS = "text-success-content"
-    DANGER = "text-danger-content"
-    WARNING = "text-warning-content"
-    INFO = "text-info-content"
+    INFO_CONTENT = "info-content"
+    SUCCESS = "success"
+    SUCCESS_CONTENT = "success-content"
+    WARNING = "warning"
+    WARNING_CONTENT = "warning-content"
+    ERROR = "error"
+    ERROR_CONTENT = "error-content"
