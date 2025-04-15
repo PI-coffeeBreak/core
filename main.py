@@ -51,15 +51,9 @@ async def lifespan(app: FastAPI):
 app.router.lifespan_context = lifespan
 
 # CORS configuration for development environments
-origins = [
-    "http://localhost",
-    "http://localhost:5173",
-    "http://localhost:5175"
-]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["http://localhost:5173"],  # Frontend Vite dev server
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
