@@ -22,8 +22,8 @@ class NotificationService:
 
     async def get_user_notifications(self, user_id: str) -> List[Message]:
         """
-        Get all undelivered notifications for a user, including both individual notifications
-        and notifications sent to their groups.
+        Get all undelivered notifications for a user, including individual notifications,
+        notifications sent to their groups, and broadcast notifications.
         """
         if self.db is None:
             raise ValueError(
@@ -37,11 +37,11 @@ class NotificationService:
         notifications = self.db.query(Message).filter(
             Message.type == "in-app",
             Message.delivered == False,
-            # Get notifications sent directly to the user or to any of their groups
+            # Get notifications sent directly to the user, to any of their groups, or broadcasts
             (
                 (Message.recipient_type == RecipientType.UNICAST) & (Message.recipient == user_id) |
-                (Message.recipient_type == RecipientType.MULTICAST) & (
-                    Message.recipient.in_(group_ids))
+                (Message.recipient_type == RecipientType.MULTICAST) & (Message.recipient.in_(group_ids)) |
+                (Message.recipient_type == RecipientType.BROADCAST)
             )
         ).all()
 
@@ -50,5 +50,22 @@ class NotificationService:
             notification.delivered = True
 
         self.db.commit()
+
+        return notifications
+
+    async def get_broadcast_notifications(self) -> List[Message]:
+        """
+        Get all undelivered broadcast notifications.
+        """
+        if self.db is None:
+            raise ValueError(
+                "NotificationService not initialized with a database session")
+
+        # Query broadcast notifications
+        notifications = self.db.query(Message).filter(
+            Message.type == "in-app",
+            Message.delivered == False,
+            Message.recipient_type == RecipientType.BROADCAST
+        ).all()
 
         return notifications
