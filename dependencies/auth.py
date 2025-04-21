@@ -72,11 +72,13 @@ def get_current_user(force_auth: bool = True):
                     status_code=401, detail="Not authenticated")
 
             try:
+                # Fix for the 'options' parameter error
                 token_info = keycloak_openid.decode_token(
                     token,
                     key=keycloak_openid.public_key(),
-                    options={"verify_signature": True,
-                             "verify_aud": True, "exp": True}
+                    verify_signature=True,
+                    verify_aud=True,
+                    exp=True
                 )
                 return token_info
             except Exception as decode_error:

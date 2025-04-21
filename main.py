@@ -1,4 +1,3 @@
-import asyncio
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import logging
@@ -9,16 +8,20 @@ from plugin_loader import plugin_loader
 from dependencies.app import set_current_app
 
 from dependencies.database import engine, Base
-from routes import routes_app
 from swagger import configure_swagger_ui
 from plugin_loader import plugin_unloader
 from defaults import initialize_defaults
+from services.message_bus import MessageBus
+from services.notifications import NotificationService
+from services.handlers import register_notification_handlers
+from dependencies.database import get_db
 
 logger = logging.getLogger("coffeebreak")
 
 app = FastAPI(root_path="/api/v1", openapi_prefix="/api/v1")
-set_current_app(routes_app)
+set_current_app(app)
 
+from routes import routes_app
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -43,6 +46,17 @@ async def lifespan(app: FastAPI):
             f"Route: {route.path} [{route.methods if hasattr(route, 'methods') else 'WebSocket'}]")
 
     try:
+        # Get database session
+        db = next(get_db())
+
+        # Initialize services
+        message_bus = MessageBus(db)
+        notification_service = NotificationService(db)
+
+        # Register handlers
+        await register_notification_handlers(message_bus, notification_service)
+
+        logger.info("Application startup completed successfully")
         yield
     finally:
         await plugin_unloader(routes_app)
