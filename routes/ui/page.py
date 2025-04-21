@@ -57,7 +57,7 @@ async def delete_page(page_id: str, user_info: dict = Depends(check_role(["custo
     return {"page_id": page_id}
 
 
-@router.get("/", response_model=List[page_schema.PageResponse], summary="List all pages")
+@router.get("/", response_model=List[page_schema.PageResponse], summary="List all enabled pages")
 async def list_pages():
     logger.debug("Listing all pages")
     pages = await page_service.list_pages()
@@ -70,9 +70,23 @@ async def list_pages():
             "enabled": page["enabled"],
             "components": page["components"]
         }
-        for page in pages
+        for page in pages if page.get("enabled", False) is True
     ]
 
+@router.get("/all", response_model=List[page_schema.PageResponse], summary="List all pages (enabled and disabled)")
+async def list_all_pages():
+    logger.debug("Listing all pages (enabled and disabled)")
+    pages = await page_service.list_pages()
+    return [
+        {
+            "page_id": page["id"],
+            "title": page["title"],
+            "description": page["description"],
+            "enabled": page["enabled"],
+            "components": page["components"]
+        }
+        for page in pages
+    ]
 
 @router.get("/{page_id}", response_model=page_schema.PageResponse, summary="Get a page by its ID")
 async def get_page(page_id: str):
