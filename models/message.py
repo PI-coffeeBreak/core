@@ -1,14 +1,8 @@
 from dependencies.database import Base
-from sqlalchemy import Column, Integer, String, Boolean, Enum
+from sqlalchemy import Column, Integer, String, Boolean, DateTime
 from sqlalchemy.types import Enum as SQLAlchemyEnum
-from enum import Enum as PyEnum
-
-
-class RecipientType(PyEnum):
-    UNICAST = "UNICAST"
-    MULTICAST = "MULTICAST"
-    BROADCAST = "BROADCAST"
-
+from schemas.notification import RecipientType
+from datetime import UTC, datetime
 
 class Message(Base):
     __tablename__ = "messages"
@@ -20,3 +14,4 @@ class Message(Base):
     payload = Column(String, nullable=False)
     priority = Column(Integer, nullable=False)
     delivered = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.now(UTC))

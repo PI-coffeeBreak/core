@@ -1,5 +1,6 @@
 from fastapi import APIRouter
-from . import users, activities, activity_types, auth, plugins, totp, notifications, media, event_info
+# All routers should be imported here, otherwise they will not be included in the API
+from . import users, activities, activity_types, auth, plugins, totp, notifications, media, event_info, websocket
 from .ui import color_themes, page, main_menu, plugin_settings
 from .components import router as components_router
 
