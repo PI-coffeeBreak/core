@@ -165,7 +165,6 @@ async def websocket_endpoint(websocket: WebSocket):
 
                         # Handle message with registered topic handlers
                         await websocket_service.handle_topic_message(
-                            websocket,
                             connection_id,
                             topic,
                             message["data"]
