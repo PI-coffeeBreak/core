@@ -1,7 +1,7 @@
 from pydantic import Field
 from schemas.ui.page import BaseComponentSchema
-from schemas.ui.color import Color
 from schemas.media import Media
+from typing import Optional
 
 class Video(BaseComponentSchema):
     """
@@ -14,11 +14,36 @@ class Video(BaseComponentSchema):
         loop (bool): Whether the video should loop
         muted (bool): Whether the video should be muted
         poster (str): The URL of the poster image for the video
+        title (str): The title of the video
+        description (str): A description of the video content
+        allowFullscreen (bool): Whether to allow fullscreen mode
+        startAt (int): Time in seconds to start the video at
     """
+    title: str = Field(
+        default="",
+        description="The title of the video",
+        optional=True
+    )
+    description: str = Field(
+        default="",
+        description="A description of the video content",
+        optional=True
+    )
     src: str | Media = Field(
         ..., description="The source URL of the video (can be an external URL or a Media reference)")
     autoplay: bool = Field(default=False, description="Whether the video should autoplay", optional=True)
     controls: bool = Field(default=True, description="Whether to show video controls", optional=True)
     loop: bool = Field(default=False, description="Whether the video should loop", optional=True)
     muted: bool = Field(default=False, description="Whether the video should be muted", optional=True)
-    poster: str = Field(default=None, description="The URL of the poster image for the video", optional=True)
+    allowFullscreen: bool = Field(default=True, description="Whether to allow fullscreen mode", optional=True)
+    startAt: int = Field(
+        default=0,
+        description="Time in seconds to start the video at",
+        optional=True,
+        ge=0
+    )
+    poster: Optional[str | Media] = Field(
+        default=None,
+        description="The URL of the poster image for the video (can be an external URL or a Media reference)",
+        optional=True
+    )
