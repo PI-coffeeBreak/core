@@ -26,7 +26,7 @@ async def upload_media(
     uuid: str,
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
-    user: Optional[dict] = Depends(lambda: get_current_user(force_auth=False))
+    user: dict = Depends(lambda: get_current_user(force_auth=False))
 ):
     """Upload a new media file"""
     return MediaService.create(db, uuid, file.file, file.filename, user)

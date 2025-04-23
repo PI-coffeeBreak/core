@@ -1,25 +1,24 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, Request, Response
 import logging
-from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.requests import Request
 from contextlib import asynccontextmanager
 from plugin_loader import plugin_loader
 from dependencies.app import set_current_app
-
-from dependencies.database import engine, Base
+from dependencies.database import engine, Base, get_db
 from swagger import configure_swagger_ui
 from plugin_loader import plugin_unloader
 from defaults import initialize_defaults
 from services.message_bus import MessageBus
 from services.notifications import NotificationService
-from services.handlers import register_notification_handlers
-from dependencies.database import get_db
+from middlewares import setup_middlewares
+import os
 
 logger = logging.getLogger("coffeebreak")
 
 app = FastAPI(root_path="/api/v1", openapi_prefix="/api/v1")
 set_current_app(app)
+
+# Setup middlewares
+setup_middlewares()
 
 from routes import routes_app
 
@@ -46,49 +45,12 @@ async def lifespan(app: FastAPI):
             f"Route: {route.path} [{route.methods if hasattr(route, 'methods') else 'WebSocket'}]")
 
     try:
-        # Get database session
-        db = next(get_db())
-
-        # Initialize services
-        message_bus = MessageBus(db)
-        notification_service = NotificationService(db)
-
-        # Register handlers
-        await register_notification_handlers(message_bus, notification_service)
-
-        logger.info("Application startup completed successfully")
         yield
     finally:
         await plugin_unloader(routes_app)
 
 
 app.router.lifespan_context = lifespan
-
-# CORS configuration for development environments
-origins = [
-    "http://localhost",
-    "http://localhost:5173",
-    "http://localhost:5175"
-]
-
-# CORS configuration for development environments
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins, 
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-
-class CoffeeBreakLoggerMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request: Request, call_next):
-        response = await call_next(request)
-        logger.debug(
-            f"{request.method} {request.url} - {response.status_code}")
-        return response
-
-
-app.add_middleware(CoffeeBreakLoggerMiddleware)
 
 # Start the application with:
 # uvicorn main:app --reload --log-config logging_config.json

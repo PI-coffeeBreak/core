@@ -1,5 +1,5 @@
 from typing import List, Dict
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from dependencies.database import get_db
 from schemas.user import User as UserSchema, UserCreate
@@ -31,6 +31,16 @@ KEYCLOAK_NATIVE_ROLES = {
 async def read_users_me(current_user: dict = Depends(get_current_user())):
     return current_user
 
+@router.get("/guest/me")
+def me(
+    user = Depends(get_current_user(force_auth=False)),
+    request: Request = None
+):
+    token = getattr(request.state, "generated_token", None)
+    return {
+        "user": user,
+        "generated_token": token  # só vai aparecer se foi gerado no backend
+    }
 
 @router.get("/im/organizer")
 async def im_organizer(current_user: dict = Depends(check_role(["organizer"]))):

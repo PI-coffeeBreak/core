@@ -1,6 +1,7 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, field_serializer
 from enum import Enum
 from typing import List, Dict, Union, Optional
+from datetime import datetime
 
 
 class RecipientType(str, Enum):
@@ -23,8 +24,14 @@ class NotificationRequest(BaseModel):
 
 class NotificationResponse(BaseModel):
     id: int
+    recipient_type: RecipientType
+    recipient: Optional[str] = None
     payload: str
-    delivered: bool
+    created_at: datetime
+
+    @field_serializer('created_at')
+    def serialize_created_at(self, created_at: datetime, _info):
+        return created_at.isoformat()
 
     class Config:
         from_attributes = True
