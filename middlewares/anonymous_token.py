@@ -15,7 +15,7 @@ class AnonymousTokenMiddleware(BaseHTTPMiddleware):
                 httponly=True,
                 secure=os.environ.get("ENVIRONMENT", "development") == "production",
                 samesite="Lax",
-                max_age=60 * 60 * 24 * 7
+                max_age=60 * 60 * 24 * 90
             )
 
         return response 
