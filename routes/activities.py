@@ -26,7 +26,7 @@ def create_activity(activity: ActivityCreate, db: Session = Depends(get_db), use
             max_size=10 * 1024 * 1024,
             allows_rewrite=True,
             valid_extensions=['.jpg', '.jpeg', '.png', '.webp'],
-            alias=f"{slugify(activity.title)}-{uuid4()}"
+            alias=f"{slugify(activity.name)}-{uuid4()}"
         )
         image = media.uuid
 
@@ -48,7 +48,7 @@ def create_activities(activities: List[ActivityCreate], db: Session = Depends(ge
                 max_size=10 * 1024 * 1024,
                 allows_rewrite=True,
                 valid_extensions=['.jpg', '.jpeg', '.png', '.webp'],
-                alias=f"{slugify(activity.title)}-{uuid4()}"
+                alias=f"{slugify(activity.name)}-{uuid4()}"
             )
             image = media.uuid
 
@@ -88,7 +88,7 @@ def update_activity(activity_id: int, activity: ActivityCreate, db: Session = De
                 max_size=10 * 1024 * 1024,
                 allows_rewrite=True,
                 valid_extensions=['.jpg', '.jpeg', '.png', '.webp'],
-                alias=f"{slugify(db_activity.title)}-{uuid4()}"
+                alias=f"{slugify(db_activity.name)}-{uuid4()}"
             )
             update_data["image"] = media.uuid
 
@@ -110,4 +110,24 @@ def delete_activity(activity_id: int, db: Session = Depends(get_db), user: dict 
 
     db.delete(db_activity)
     db.commit()
+    return db_activity
+
+@router.delete("/{activity_id}/image", response_model=ActivitySchema)
+def remove_activity_image(
+    activity_id: int,
+    db: Session = Depends(get_db),
+    user: dict = Depends(check_role(["manage_activities"]))
+):
+    db_activity = db.query(Activity).filter(Activity.id == activity_id).first()
+    if db_activity is None:
+        raise HTTPException(status_code=404, detail="Activity not found")
+
+    if is_valid_uuid(db_activity.image):
+        MediaService.unregister(db, db_activity.image, force=True)
+    else:
+        raise HTTPException(status_code=404, detail="Image is external or was not found")
+
+    db_activity.image = None
+    db.commit()
+    db.refresh(db_activity)
     return db_activity
