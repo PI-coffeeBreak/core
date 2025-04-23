@@ -6,20 +6,12 @@ import uuid
 import logging
 import json
 import asyncio
-from fastapi.middleware.cors import CORSMiddleware
 from dependencies.app import get_current_app
 
 logger = logging.getLogger("coffeebreak.websocket")
 
 # Configure CORS for WebSocket
 app = get_current_app()
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # In production, replace with your frontend URL
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 async def send_subscription_confirmation(websocket: WebSocket, topic: str, status: str, message: str = None):
     """Helper function to send subscription confirmation"""
