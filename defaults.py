@@ -8,6 +8,7 @@ from schemas.ui.components.image import Image
 from schemas.ui.components.text import Text
 from schemas.ui.components.button import Button
 from schemas.ui.components.location import Location
+from schemas.ui.components.video import Video
 from services.component_registry import ComponentRegistry
 from services.media import MediaService
 from repository.media import LocalMediaRepo
@@ -71,14 +72,6 @@ async def create_default_pages():
     """Creates default pages if they don't exist"""
     pages_collection = db['pages']
     if await pages_collection.count_documents({}) == 0:
-        location_component = Location(
-            name="Location",
-            address = "Aveiro, Portugal", 
-            venueTitle = "Event Venue",
-            latitude=40.62338,
-            longitude=-8.65784,
-            zoom=15
-        )
 
         # Create home page with Welcome component
         home_page = Page(
@@ -186,6 +179,8 @@ async def register_default_components():
     logger.debug("Registered Button component")
     component_registry.register_component(Location)
     logger.debug("Registered Location component")
+    component_registry.register_component(Video)
+    logger.debug("Registered Video component")
 
 
 async def initialize_defaults():
