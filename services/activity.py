@@ -101,9 +101,6 @@ class ActivityService:
         elif len(activity_type.type) > MAX_NAME_LENGTH:
             errors.append(ActivityTypeErrors.NAME_TOO_LONG.format(max_length=MAX_NAME_LENGTH))
 
-        if activity_type.description and len(activity_type.description) > MAX_DESCRIPTION_LENGTH:
-            errors.append(ActivityTypeErrors.DESCRIPTION_TOO_LONG.format(max_length=MAX_DESCRIPTION_LENGTH))
-
         return errors
 
     def get_all(self) -> List[Activity]:
