@@ -37,7 +37,7 @@ def get_activity(activity_id: int, db: Session = Depends(get_db)):
 @router.put("/{activity_id}", response_model=ActivitySchema)
 def update_activity(activity_id: int, activity: ActivityCreate, db: Session = Depends(get_db), user: dict = Depends(check_role(["manage_activities"]))):
     try:
-        return ActivityService(db).update(activity_id, activity, user["id"])
+        return ActivityService(db).update(activity_id, activity)
     except ActivityError as e:
         raise HTTPException(status_code=e.status_code, detail=e.message)
 
@@ -45,7 +45,7 @@ def update_activity(activity_id: int, activity: ActivityCreate, db: Session = De
 def delete_activity(activity_id: int, db: Session = Depends(get_db), user: dict = Depends(check_role(["manage_activities"]))):
     try:
         activity = ActivityService(db).get_by_id(activity_id)
-        ActivityService(db).delete(activity_id, user["id"])
+        ActivityService(db).delete(activity_id)
         return activity
     except ActivityError as e:
         raise HTTPException(status_code=e.status_code, detail=e.message)
@@ -53,6 +53,6 @@ def delete_activity(activity_id: int, db: Session = Depends(get_db), user: dict 
 @router.delete("/{activity_id}/image", response_model=ActivitySchema)
 def remove_activity_image(activity_id: int, db: Session = Depends(get_db), user: dict = Depends(check_role(["manage_activities"]))):
     try:
-        return ActivityService(db).remove_image(activity_id, user["id"])
+        return ActivityService(db).remove_image(activity_id)
     except ActivityError as e:
         raise HTTPException(status_code=e.status_code, detail=e.message)

@@ -51,7 +51,7 @@ async def get_user(user_id: str) -> dict:
     try:
         user = keycloak_admin.get_user(user_id)
         return user
-    except Exception as e:
+    except Exception as _:
         raise UserNotFoundError(user_id)
 
 
