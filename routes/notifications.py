@@ -13,7 +13,6 @@ router = APIRouter()
 
 # Initialize WebSocket handlers
 websocket_service = WebSocketService()
-notification_service = NotificationService()
 
 @websocket_service.on_receive("notifications")
 async def handle_notification_message(connection: WebSocketConnection, message: dict):
@@ -59,13 +58,13 @@ async def handle_notification_message(connection: WebSocketConnection, message: 
 async def handle_notification_subscription(connection: WebSocketConnection):
     """Handle new subscription to notifications topic"""
     logger.debug(f"New subscription to notifications topic from connection {connection.connection_id}")
-    notification_service.add_connection(connection)
+    NotificationService().add_connection(connection)
 
 @websocket_service.on_unsubscribe("notifications")
 async def handle_notification_unsubscribe(connection: WebSocketConnection):
     """Handle unsubscription from notifications topic"""
     logger.debug(f"Unsubscribed from notifications topic: {connection.connection_id}")
-    notification_service.remove_connection(connection)
+    NotificationService().remove_connection(connection)
 
 @router.get("/", response_model=List[NotificationResponse])
 async def get_notifications(

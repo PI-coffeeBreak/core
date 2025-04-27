@@ -7,6 +7,19 @@ import asyncio
 
 logger = logging.getLogger("coffeebreak.websocket")
 
+
+
+#######################
+# Protocol definition #
+#######################
+# WebSocket Message Types
+# 
+# - topicMessage: A message to be sent to a specific topic
+# - ping: A ping message to check connection
+# - pong: A pong message to respond to a ping
+# - subscription: A subscription message to subscribe to a topic
+# - unsubscribe: A unsubscribe message to unsubscribe from a topic
+
 T = TypeVar('T')
 
 class WebSocketMessage(BaseModel, Generic[T]):

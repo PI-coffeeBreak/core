@@ -5,7 +5,7 @@ import logging
 import asyncio
 from utils.api import Router
 from typing import List, Tuple, Optional
-
+from exceptions.plugin import PluginNotLoadedError
 logger = logging.getLogger("coffeebreak.core")
 
 plugins_modules = {}
@@ -124,17 +124,15 @@ def _setup_plugin_router(app: APIRouter, plugin_name: str, module) -> None:
     app.include_router(router, prefix=prefix, tags=[tag])
 
 
-async def load_plugin(app: APIRouter, plugin_name: str) -> bool:
+async def load_plugin(app: APIRouter, plugin_name: str) -> None:
     """Load a single plugin"""
     if plugin_name not in plugins_modules or plugin_name in registered_plugins:
-        return False
+        raise PluginNotLoadedError(plugin_name)
 
     module = plugins_modules[plugin_name]
     await _register_plugin(module)
     _setup_plugin_router(app, plugin_name, module)
     registered_plugins[plugin_name] = module
-
-    return True
 
 
 async def _unregister_plugin(module) -> None:
@@ -160,8 +158,7 @@ def _remove_plugin_routes(app: APIRouter, module) -> None:
 async def unload_plugin(app: APIRouter, plugin_name: str) -> bool:
     """Unload a single plugin"""
     if plugin_name not in registered_plugins:
-        logger.warning(f"Plugin {plugin_name} not found")
-        return False
+        raise PluginNotLoadedError(plugin_name)
 
     module = registered_plugins.pop(plugin_name)
     await _unregister_plugin(module)

@@ -3,6 +3,7 @@ from typing import Callable, Dict, List
 from datetime import datetime
 from models.event import Event  # Model Event in the database
 from schemas.event import EventRequest, EventType
+from exceptions.event import EventNotFoundError
 
 class EventBus:
     _instance = None
@@ -52,5 +53,5 @@ class EventBus:
     def get_event(self, event_id: str):
         event = self.db.query(Event).filter(Event.id == event_id).first()
         if not event:
-            raise Exception(f"Event with id {event_id} not found.")
+            raise EventNotFoundError(event_id)
         return event

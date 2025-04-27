@@ -1,5 +1,6 @@
 from typing import Dict, Type, Optional
 from schemas.ui.page import BaseComponentSchema
+from exceptions.component import ComponentInvalidBaseError, ComponentAlreadyRegisteredError, ComponentNotFoundError
 
 
 class ComponentRegistry:
@@ -24,16 +25,15 @@ class ComponentRegistry:
             component_class: Component class that inherits from BaseComponentSchema
 
         Raises:
-            ValueError: If component is already registered or doesn't inherit from BaseComponentSchema
+            ComponentInvalidBaseError: If component doesn't inherit from BaseComponentSchema
+            ComponentAlreadyRegisteredError: If component is already registered
         """
         if not issubclass(component_class, BaseComponentSchema):
-            raise ValueError(
-                f"Component class {component_class.__name__} must inherit from BaseComponentSchema")
+            raise ComponentInvalidBaseError(component_class.__name__)
 
         component_name = component_class.__name__
         if component_name in cls._components:
-            raise ValueError(
-                f"Component {component_name} is already registered")
+            raise ComponentAlreadyRegisteredError(component_name)
 
         cls._components[component_name] = component_class
 
@@ -46,9 +46,15 @@ class ComponentRegistry:
             component_name: Name of the component class
 
         Returns:
-            Component class if found, None otherwise
+            Component class if found
+
+        Raises:
+            ComponentNotFoundError: If component is not found
         """
-        return cls._components.get(component_name)
+        component = cls._components.get(component_name)
+        if not component:
+            raise ComponentNotFoundError(component_name)
+        return component
 
     @classmethod
     def list_components(cls) -> Dict[str, Type[BaseComponentSchema]]:
@@ -61,17 +67,16 @@ class ComponentRegistry:
         return cls._components.copy()
 
     @classmethod
-    def unregister_component(cls, component_name: str) -> bool:
+    def unregister_component(cls, component_name: str) -> None:
         """
         Unregister a component by name
 
         Args:
             component_name: Name of the component class to unregister
 
-        Returns:
-            True if component was unregistered, False if not found
+        Raises:
+            ComponentNotFoundError: If component is not found
         """
-        if component_name in cls._components:
-            del cls._components[component_name]
-            return True
-        return False
+        if component_name not in cls._components:
+            raise ComponentNotFoundError(component_name)
+        del cls._components[component_name]

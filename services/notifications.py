@@ -8,6 +8,9 @@ from services.message_bus import MessageBus
 from typing import List, Dict, Set
 import logging
 import asyncio
+from exceptions.notifications import (
+    NotificationNotInitializedError
+)
 
 logger = logging.getLogger("coffeebreak.notifications")
 
@@ -61,7 +64,7 @@ class NotificationService:
     async def mark_notifications_read(self, user_id: str, notification_ids: List[int]):
         """Mark specified notifications as read"""
         if self.db is None:
-            raise ValueError("NotificationService not initialized with a database session")
+            raise NotificationNotInitializedError()
 
         for notification_id in notification_ids:
             notification_read = NotificationRead(
@@ -151,8 +154,7 @@ class NotificationService:
         notifications sent to their groups, and broadcast notifications.
         """
         if self.db is None:
-            raise ValueError(
-                "NotificationService not initialized with a database session")
+            raise NotificationNotInitializedError()
 
         # Get user's groups
         user_groups = await get_user_groups(user_id)
@@ -180,8 +182,7 @@ class NotificationService:
         Get all broadcast notifications.
         """
         if self.db is None:
-            raise ValueError(
-                "NotificationService not initialized with a database session")
+            raise NotificationNotInitializedError()
 
         # Query broadcast notifications
         notifications = self.db.query(Notification).filter(

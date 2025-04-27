@@ -1,0 +1,3 @@
+# Validation constants
+MAX_NAME_LENGTH = 100
+MAX_DESCRIPTION_LENGTH = 750 

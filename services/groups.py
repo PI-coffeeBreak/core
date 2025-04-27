@@ -1,6 +1,12 @@
 from dependencies.auth import keycloak_admin, is_anonymous
 from keycloak.exceptions import KeycloakError
-from fastapi import HTTPException
+from exceptions.group import (
+    GroupNotFoundError,
+    GroupListError,
+    GroupCreateError,
+    GroupAddUserError,
+    GroupGetUsersError
+)
 import logging
 logger = logging.getLogger("coffeebreak.core")
 
@@ -14,8 +20,7 @@ async def get_user_groups(user_id: str):
         return groups
     except KeycloakError as e:
         logger.error(f"Failed to get user groups: {str(e)}")
-        raise HTTPException(
-            status_code=500, detail="Failed to get user groups")
+        raise GroupListError(str(e))
 
 
 def create_group(group_name: str):
@@ -25,7 +30,7 @@ def create_group(group_name: str):
         return {"message": f"Group '{group_name}' created successfully", "group_id": group_id}
     except KeycloakError as e:
         logger.warning(f"Failed to create group: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to create group")
+        raise GroupCreateError(str(e))
 
 
 def add_client_to_group(client_id: str, group_name: str):
@@ -35,8 +40,7 @@ def add_client_to_group(client_id: str, group_name: str):
         group = next((g for g in groups if g["name"] == group_name), None)
 
         if not group:
-            raise HTTPException(
-                status_code=404, detail=f"Group '{group_name}' not found")
+            raise GroupNotFoundError(group_name)
 
         group_id = group["id"]
 
@@ -45,8 +49,7 @@ def add_client_to_group(client_id: str, group_name: str):
 
     except KeycloakError as e:
         logger.error(f"Failed to add client to group: {str(e)}")
-        raise HTTPException(
-            status_code=500, detail="Failed to add client to group")
+        raise GroupAddUserError(str(e))
 
 
 def get_users_in_group(group_name: str):
@@ -59,8 +62,7 @@ def get_users_in_group(group_name: str):
         logger.debug("Group found: %s", group)
 
         if not group:
-            raise HTTPException(
-                status_code=404, detail=f"Group '{group_name}' not found")
+            raise GroupNotFoundError(group_name)
 
         group_id = group["id"]
 
@@ -69,5 +71,4 @@ def get_users_in_group(group_name: str):
 
     except KeycloakError as e:
         logger.error(f"Failed to get users in group: {str(e)}")
-        raise HTTPException(
-            status_code=500, detail="Failed to get users in group")
+        raise GroupGetUsersError(str(e))
