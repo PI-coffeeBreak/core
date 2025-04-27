@@ -117,8 +117,8 @@ class ActivityService:
             raise ActivityNotFoundError(activity_id)
         return activity
 
-    def create(self, activity: ActivityCreate, user_id: int) -> Activity:
-        """Create a new activity"""
+    def _create_single_activity(self, activity: ActivityCreate) -> Activity:
+        """Create a single activity with image handling"""
         # Validate activity data
         errors = self._validate_activity(activity)
         if errors:
@@ -131,41 +131,28 @@ class ActivityService:
                 db=self.db,
                 max_size=ImageExtension.MAX_SIZE,
                 allows_rewrite=True,
-                    valid_extensions=ImageExtension.ALLOWED,
+                valid_extensions=ImageExtension.ALLOWED,
                 alias=f"{slugify(activity.name)}-{uuid4()}"
             )
             image = media.uuid
 
-        db_activity = Activity(**activity.model_dump(exclude={"image"}), image=image, created_by=user_id)
+        db_activity = Activity(**activity.model_dump(exclude={"image"}), image=image)
         self.db.add(db_activity)
+        return db_activity
+
+    def create(self, activity: ActivityCreate) -> Activity:
+        """Create a new activity"""
+        db_activity = self._create_single_activity(activity)
         self.db.commit()
         self.db.refresh(db_activity)
         return db_activity
 
-    def create_many(self, activities: List[ActivityCreate], user_id: int) -> List[Activity]:
+    def create_many(self, activities: List[ActivityCreate]) -> List[Activity]:
         """Create multiple activities"""
         db_activities = []
         for activity in activities:
-            # Validate activity data
-            errors = self._validate_activity(activity)
-            if errors:
-                raise ActivityValidationError(errors)
-
-            # Handle image
-            image = activity.image
-            if not image or not is_valid_url(image):
-                media = MediaService.register(
-                    db=self.db,
-                    max_size=ImageExtension.MAX_SIZE,
-                    allows_rewrite=True,
-                    valid_extensions=ImageExtension.ALLOWED,
-                    alias=f"{slugify(activity.name)}-{uuid4()}"
-                )
-                image = media.uuid
-
-            db_activity = Activity(**activity.model_dump(exclude={"image"}), image=image, created_by=user_id)
+            db_activity = self._create_single_activity(activity)
             db_activities.append(db_activity)
-            self.db.add(db_activity)
 
         self.db.commit()
         for activity in db_activities:
