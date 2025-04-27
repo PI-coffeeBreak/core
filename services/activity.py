@@ -218,6 +218,7 @@ class ActivityService:
         return db_activity
 
     def _validate_activity(self, activity: ActivityCreate | ActivityUpdate) -> List[str]:
+        """Validate activity data"""
         errors = []
         
         if not activity.name:
@@ -228,7 +229,7 @@ class ActivityService:
         if activity.description and len(activity.description) > MAX_DESCRIPTION_LENGTH:
             errors.append(ActivityErrors.DESCRIPTION_TOO_LONG.format(max_length=MAX_DESCRIPTION_LENGTH))
 
-        if activity.start_time and activity.end_time and activity.start_time >= activity.end_time:
+        if activity.date and activity.duration and activity.date.timestamp() + activity.duration * 60 <= activity.date.timestamp():
             errors.append(ActivityErrors.START_TIME_AFTER_END)
 
         return errors 

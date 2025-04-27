@@ -20,7 +20,7 @@ class ActivityErrors:
     NAME_REQUIRED = "Name is required"
     NAME_TOO_LONG = "Name must be less than {max_length} characters"
     DESCRIPTION_TOO_LONG = "Description must be less than {max_length} characters"
-    START_TIME_AFTER_END = "Start time must be before end time"
+    START_TIME_AFTER_END = "Activity duration must be greater than 0"
 
 class ActivityTypeErrors:
     """Activity type service error messages"""

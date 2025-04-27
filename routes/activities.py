@@ -14,16 +14,16 @@ def get_activities(db: Session = Depends(get_db)):
     return ActivityService(db).get_all()
 
 @router.post("/", response_model=ActivitySchema)
-def create_activity(activity: ActivityCreate, db: Session = Depends(get_db), user: dict = Depends(check_role(["manage_activities"]))):
+def create_activity(activity: ActivityCreate, db: Session = Depends(get_db), _: dict = Depends(check_role(["manage_activities"]))):
     try:
-        return ActivityService(db).create(activity, user["id"])
+        return ActivityService(db).create(activity)
     except ActivityError as e:
         raise HTTPException(status_code=e.status_code, detail=e.message)
 
 @router.post("/batch", response_model=List[ActivitySchema])
-def create_activities(activities: List[ActivityCreate], db: Session = Depends(get_db), user: dict = Depends(check_role(["manage_activities"]))):
+def create_activities(activities: List[ActivityCreate], db: Session = Depends(get_db), _: dict = Depends(check_role(["manage_activities"]))):
     try:
-        return ActivityService(db).create_many(activities, user["id"])
+        return ActivityService(db).create_many(activities)
     except ActivityError as e:
         raise HTTPException(status_code=e.status_code, detail=e.message)
 

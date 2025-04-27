@@ -4,11 +4,11 @@ import os
 from typing import Optional, List, BinaryIO, Type
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, UploadFile
-
 from models.media import Media
 from repository.media import BaseMediaRepo
 from dependencies.auth import get_current_user
 from constants.errors import MediaErrors
+from constants.extensions import Extension
 from exceptions.media import (
     MediaError,
     MediaNotFoundError,
@@ -85,7 +85,7 @@ class MediaService:
         db: Session,
         max_size: Optional[int] = None,
         allows_rewrite: bool = True,
-        valid_extensions: List[str] = None,
+        valid_extensions: List[str | Extension] = None,
         alias: Optional[str] = None
     ) -> Media:
         """

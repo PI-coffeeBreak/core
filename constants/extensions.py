@@ -1,6 +1,6 @@
-from enum import Enum
+from enum import StrEnum
 
-class Extension(Enum):
+class Extension(StrEnum):
     """File extensions enumeration"""
     JPG = ".jpg"
     JPEG = ".jpeg"
@@ -38,7 +38,6 @@ class Extension(Enum):
     WAV = ".wav"
     OGG = ".ogg"
     FLAC = ".flac"
-    
 
 # !!!-------------------- important note --------------------!!!
 # All classes below are used to validate the file extensions and
