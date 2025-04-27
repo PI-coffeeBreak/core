@@ -96,9 +96,9 @@ class ActivityService:
         """Validate activity type data"""
         errors = []
         
-        if not activity_type.name:
+        if not activity_type.type:
             errors.append(ActivityTypeErrors.NAME_REQUIRED)
-        elif len(activity_type.name) > MAX_NAME_LENGTH:
+        elif len(activity_type.type) > MAX_NAME_LENGTH:
             errors.append(ActivityTypeErrors.NAME_TOO_LONG.format(max_length=MAX_NAME_LENGTH))
 
         if activity_type.description and len(activity_type.description) > MAX_DESCRIPTION_LENGTH:

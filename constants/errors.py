@@ -25,8 +25,8 @@ class ActivityErrors:
 class ActivityTypeErrors:
     """Activity type service error messages"""
     NOT_FOUND = "Activity type with id {type_id} not found"
-    NAME_REQUIRED = "Name is required"
-    NAME_TOO_LONG = "Name must be less than {max_length} characters"
+    NAME_REQUIRED = "Type is required"
+    NAME_TOO_LONG = "Type must be less than {max_length} characters"
     DESCRIPTION_TOO_LONG = "Description must be less than {max_length} characters"
     REQUIRES_MANAGE = "Operation requires manage_activities role"
 
