@@ -51,7 +51,7 @@ class LocalMediaRepo(BaseMediaRepo):
     def _get_file_path(self, hash: str) -> str:
         """Get the full path for a file based on its hash"""
         dirs = self._get_dirs_from_hash(hash)
-        return os.path.join(self.root_path, *dirs)
+        return os.path.join(self.root_path, *dirs, hash)
 
     def _ensure_dir_exists(self, hash: str) -> None:
         """Ensure the directory structure exists for given hash"""

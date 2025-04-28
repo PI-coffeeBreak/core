@@ -1,4 +1,6 @@
-class MediaErrors:
+from enum import StrEnum
+
+class MediaErrors(StrEnum):
     """Media service error messages"""
     NOT_FOUND = "Media not found"
     ALREADY_EXISTS = "Media already exists"
@@ -10,7 +12,7 @@ class MediaErrors:
     REQUIRES_OP = "Operation requires media_op role"
     HAS_FILE = "Cannot unregister media with existing file"
 
-class ActivityErrors:
+class ActivityErrors(StrEnum):
     """Activity service error messages"""
     NOT_FOUND = "Activity with id {activity_id} not found"
     NO_IMAGE = "Activity with id {activity_id} has no image"
@@ -22,7 +24,7 @@ class ActivityErrors:
     DESCRIPTION_TOO_LONG = "Description must be less than {max_length} characters"
     START_TIME_AFTER_END = "Activity duration must be greater than 0"
 
-class ActivityTypeErrors:
+class ActivityTypeErrors(StrEnum):
     """Activity type service error messages"""
     NOT_FOUND = "Activity type with id {type_id} not found"
     NAME_REQUIRED = "Type is required"
@@ -30,33 +32,33 @@ class ActivityTypeErrors:
     DESCRIPTION_TOO_LONG = "Description must be less than {max_length} characters"
     REQUIRES_MANAGE = "Operation requires manage_activities role"
 
-class EventErrors:
+class EventErrors(StrEnum):
     """Event service error messages"""
     NOT_FOUND = "Event with id {event_id} not found"
 
-class MessageErrors:
+class MessageErrors(StrEnum):
     """Message service error messages"""
     NOT_INITIALIZED = "MessageBus not initialized with a database session"
     NOT_FOUND = "Message with id {message_id} not found"
     INVALID_RECIPIENT_TYPE = "Invalid recipient type: {recipient_type}"
 
-class ComponentErrors:
+class ComponentErrors(StrEnum):
     """Component service error messages"""
     INVALID_BASE = "Component class {component_name} must inherit from BaseComponentSchema"
     ALREADY_REGISTERED = "Component {component_name} is already registered"
     NOT_FOUND = "Component {component_name} not found"
 
-class NotificationErrors:
+class NotificationErrors(StrEnum):
     """Notification service error messages"""
     NOT_INITIALIZED = "NotificationService not initialized with a database session"
 
-class PluginErrors:
+class PluginErrors(StrEnum):
     """Plugin service error messages"""
     NOT_FOUND = "Plugin {plugin_name} not found"
     NOT_LOADED = "Plugin {plugin_name} is not loaded"
     SETTINGS_ERROR = "Error updating settings for plugin {plugin_name}"
 
-class UserErrors:
+class UserErrors(StrEnum):
     """User service error messages"""
     NOT_FOUND = "User with id {user_id} not found"
     LIST_ERROR = "Failed to list users: {error}"
@@ -65,7 +67,7 @@ class UserErrors:
     DELETE_ERROR = "Failed to delete user: {error}"
     ROLE_ERROR = "Failed to assign role: {error}"
 
-class GroupErrors:
+class GroupErrors(StrEnum):
     """Group service error messages"""
     NOT_FOUND = "Group '{group_name}' not found"
     LIST_ERROR = "Failed to list groups: {error}"
