@@ -1,3 +1,9 @@
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env file
+load_dotenv()
+
 import asyncio
 from fastapi import FastAPI, Request, Response
 import logging
@@ -9,9 +15,6 @@ from swagger import configure_swagger_ui
 from plugin_loader import plugin_unloader
 from defaults import initialize_defaults
 from sqlalchemy.exc import OperationalError
-from dotenv import load_dotenv
-
-load_dotenv()
 
 logger = logging.getLogger("coffeebreak")
 
