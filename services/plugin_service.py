@@ -1,22 +1,25 @@
 from typing import Callable, Dict
 from plugin_loader import plugins_modules, registered_plugins
 from schemas.plugin import PluginDetails
+from exceptions.plugin import (
+    PluginNotFoundError,
+    PluginSettingsError
+)
 
-def update_plugin_settings(plugin_name: str, settings: dict) -> bool:
+def update_plugin_settings(plugin_name: str, settings: dict) -> None:
     if plugin_name not in plugins_modules:
-        return False
+        raise PluginNotFoundError(plugin_name)
     module = plugins_modules[plugin_name]
     if not hasattr(module, 'SETTINGS'):
-        return False
+        raise PluginSettingsError(plugin_name)
     module.SETTINGS.update(settings)
-    return True
 
 def is_plugin_loaded(plugin_name: str) -> bool:
     return plugin_name in registered_plugins
 
 def get_plugin_details(plugin_name: str) -> PluginDetails:
     if plugin_name not in plugins_modules:
-        raise ValueError(f"Plugin {plugin_name} not found")
+        raise PluginNotFoundError(plugin_name)
     module = plugins_modules[plugin_name]
     return PluginDetails(
         name=plugin_name,

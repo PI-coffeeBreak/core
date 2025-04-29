@@ -1,7 +1,5 @@
 from typing import List, Dict
 from fastapi import APIRouter, Depends, HTTPException, Request
-from sqlalchemy.orm import Session
-from dependencies.database import get_db
 from schemas.user import User as UserSchema, UserCreate
 from dependencies.auth import get_current_user, check_role, keycloak_admin
 from services.user_service import (
@@ -13,6 +11,7 @@ from services.user_service import (
     list_roles,
     list_role_users
 )
+from exceptions.user import UserError
 import logging
 
 logger = logging.getLogger("coffeebreak.core")
@@ -52,8 +51,8 @@ async def create_user_endpoint(user_data: UserCreate):
     try:
         created_user = await create_user(user_data.model_dump())
         return created_user
-    except HTTPException as e:
-        raise e
+    except UserError as e:
+        raise HTTPException(status_code=e.status_code, detail=str(e))
 
 
 @router.post("/batch", response_model=List[UserSchema], dependencies=[Depends(check_role(["manage_users"]))])
@@ -63,8 +62,8 @@ async def create_users_batch(users_data: List[UserCreate]):
         try:
             created_user = await create_user(user_data.model_dump())
             created_users.append(created_user)
-        except HTTPException as e:
-            raise e
+        except UserError as e:
+            raise HTTPException(status_code=e.status_code, detail=str(e))
     return created_users
 
 
@@ -73,8 +72,8 @@ async def list_roles_endpoint():
     try:
         roles = await list_roles()
         return roles
-    except HTTPException as e:
-        raise e
+    except UserError as e:
+        raise HTTPException(status_code=e.status_code, detail=str(e))
 
 
 @router.get("/roles/users", dependencies=[Depends(check_role(["manage_users"]))])
@@ -82,8 +81,8 @@ async def list_roles_endpoint():
     try:
         role_users = await list_role_users()
         return role_users
-    except HTTPException as e:
-        raise e
+    except UserError as e:
+        raise HTTPException(status_code=e.status_code, detail=str(e))
 
 
 @router.get("/{user_id}", response_model=UserSchema, dependencies=[Depends(check_role(["manage_users"]))])
@@ -91,8 +90,8 @@ async def get_user_endpoint(user_id: str):
     try:
         user = await get_user(user_id)
         return user
-    except HTTPException as e:
-        raise e
+    except UserError as e:
+        raise HTTPException(status_code=e.status_code, detail=str(e))
 
 
 @router.get("/", response_model=List[UserSchema], dependencies=[Depends(check_role(["manage_users"]))])
@@ -100,8 +99,8 @@ async def list_users_endpoint():
     try:
         users = await list_users()
         return users
-    except HTTPException as e:
-        raise e
+    except UserError as e:
+        raise HTTPException(status_code=e.status_code, detail=str(e))
 
 
 @router.put("/{user_id}", response_model=UserSchema, dependencies=[Depends(check_role(["manage_users"]))])
@@ -109,8 +108,8 @@ async def update_user_endpoint(user_id: str, user_data: UserCreate):
     try:
         updated_user = await update_user(user_id, user_data.model_dump())
         return updated_user
-    except HTTPException as e:
-        raise e
+    except UserError as e:
+        raise HTTPException(status_code=e.status_code, detail=str(e))
 
 
 @router.delete("/{user_id}", response_model=UserSchema, dependencies=[Depends(check_role(["manage_users"]))])
@@ -118,8 +117,8 @@ async def delete_user_endpoint(user_id: str):
     try:
         deleted_user = await delete_user(user_id)
         return deleted_user
-    except HTTPException as e:
-        raise e
+    except UserError as e:
+        raise HTTPException(status_code=e.status_code, detail=str(e))
 
 
 @router.get("/permissions", response_model=Dict[str, List[str]], dependencies=[Depends(check_role(["manage_users"]))])

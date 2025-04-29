@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from models.message import Message, RecipientType
 from schemas.notification import NotificationRequest
+from exceptions.message import MessageNotInitializedError, MessageInvalidRecipientTypeError
 import asyncio
 
 
@@ -29,10 +30,13 @@ class MessageBus:
 
     async def send_notification(self, notification: NotificationRequest):
         if self.db is None:
-            raise ValueError(
-                "MessageBus not initialized with a database session")
+            raise MessageNotInitializedError()
 
-        recipient_type = RecipientType(notification.recipient_type)
+        try:
+            recipient_type = RecipientType(notification.recipient_type)
+        except ValueError:
+            raise MessageInvalidRecipientTypeError(notification.recipient_type)
+
         new_message = Message(
             type=notification.type,
             recipient_type=recipient_type,
@@ -55,8 +59,7 @@ class MessageBus:
 
     async def receive(self, message: Message):
         if self.db is None:
-            raise ValueError(
-                "MessageBus not initialized with a database session")
+            raise MessageNotInitializedError()
 
         message.delivered = True
         self.db.commit()

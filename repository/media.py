@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 import os
 import shutil
 from typing import BinaryIO
+from constants.local_media_repo import MEDIA_REPO_PATH, MEDIA_SYMBOLS_PER_LEVEL, MEDIA_TREE_DEPTH
 
 
 class BaseMediaRepo(ABC):
@@ -40,15 +41,22 @@ class LocalMediaRepo(BaseMediaRepo):
         self.root_path = root_path
         os.makedirs(root_path, exist_ok=True)
 
+    def _get_dirs_from_hash(self, hash: str) -> list[str]:
+        """Get directory structure from hash"""
+        dirs = []
+        for i in range(0, MEDIA_TREE_DEPTH * MEDIA_SYMBOLS_PER_LEVEL, MEDIA_SYMBOLS_PER_LEVEL):
+            dirs.append(hash[i:i+MEDIA_SYMBOLS_PER_LEVEL])
+        return dirs
+
     def _get_file_path(self, hash: str) -> str:
         """Get the full path for a file based on its hash"""
-        dir1, dir2 = hash[0:2], hash[2:4]
-        return os.path.join(self.root_path, dir1, dir2, hash)
+        dirs = self._get_dirs_from_hash(hash)
+        return os.path.join(self.root_path, *dirs, hash)
 
     def _ensure_dir_exists(self, hash: str) -> None:
         """Ensure the directory structure exists for given hash"""
-        dir1, dir2 = hash[0:2], hash[2:4]
-        os.makedirs(os.path.join(self.root_path, dir1, dir2), exist_ok=True)
+        dirs = self._get_dirs_from_hash(hash)
+        os.makedirs(os.path.join(self.root_path, *dirs), exist_ok=True)
 
     def save(self, hash: str, data: BinaryIO) -> None:
         """

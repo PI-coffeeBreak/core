@@ -1,0 +1,1 @@
+ANONYMOUS_TOKEN_MAX_AGE = 60 * 60 * 24 * 90 # 90 days

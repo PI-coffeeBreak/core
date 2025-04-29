@@ -4,11 +4,23 @@ import os
 from typing import Optional, List, BinaryIO, Type
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, UploadFile
-
 from models.media import Media
 from repository.media import BaseMediaRepo
 from dependencies.auth import get_current_user
 from constants.errors import MediaErrors
+from constants.extensions import Extension
+from exceptions.media import (
+    MediaError,
+    MediaNotFoundError,
+    MediaAlreadyExistsError,
+    MediaFileTooLargeError,
+    MediaInvalidExtensionError,
+    MediaNoExtensionError,
+    MediaRequiresOpError,
+    MediaNoRewriteError,
+    MediaNoDeleteError,
+    MediaHasFileError
+)
 
 
 class MediaService:
@@ -57,25 +69,15 @@ class MediaService:
             size = file.tell()
             file.seek(0)  # Reset pointer
             if size > media.max_size:
-                raise HTTPException(
-                    status_code=400,
-                    detail=MediaErrors.FILE_TOO_LARGE.format(media.max_size)
-                )
+                raise MediaFileTooLargeError(media.max_size)
 
         # Validate extension if valid_extensions is set
         if media.valid_extensions:
             _, ext = os.path.splitext(filename)
             if not ext:
-                raise HTTPException(
-                    status_code=400,
-                    detail=MediaErrors.NO_EXTENSION
-                )
+                raise MediaNoExtensionError()
             if ext.lower() not in [ext.lower() for ext in media.valid_extensions]:
-                raise HTTPException(
-                    status_code=400,
-                    detail=MediaErrors.INVALID_EXTENSION.format(
-                        ', '.join(media.valid_extensions))
-                )
+                raise MediaInvalidExtensionError(media.valid_extensions)
 
     @classmethod
     def register(
@@ -83,7 +85,7 @@ class MediaService:
         db: Session,
         max_size: Optional[int] = None,
         allows_rewrite: bool = True,
-        valid_extensions: List[str] = None,
+        valid_extensions: List[str | Extension] = None,
         alias: Optional[str] = None
     ) -> Media:
         """
@@ -133,15 +135,13 @@ class MediaService:
         """
         media = db.query(Media).filter(Media.uuid == uuid).first()
         if not media:
-            raise HTTPException(status_code=404, detail=MediaErrors.NOT_FOUND)
+            raise MediaNotFoundError()
 
         if media.hash is not None:
-            raise HTTPException(
-                status_code=400, detail=MediaErrors.ALREADY_EXISTS)
+            raise MediaAlreadyExistsError()
 
         if media.op_required and (not user or 'media_op' not in user.get('roles', [])):
-            raise HTTPException(
-                status_code=403, detail=MediaErrors.REQUIRES_OP)
+            raise MediaRequiresOpError()
 
         # Validate file size and extension
         cls._validate_file(media, data, filename)
@@ -172,7 +172,7 @@ class MediaService:
                 raise db_error
         except Exception as e:
             db.rollback()
-            raise HTTPException(status_code=500, detail=str(e))
+            raise MediaError(str(e), 500)
 
     @classmethod
     def read(cls, db: Session, uuid: str) -> tuple[Media, BinaryIO]:
@@ -191,15 +191,15 @@ class MediaService:
         """
         media = db.query(Media).filter(Media.uuid == uuid).first()
         if not media or not media.hash:
-            raise HTTPException(status_code=404, detail=MediaErrors.NOT_FOUND)
+            raise MediaNotFoundError()
 
         try:
             data = cls._get_repository().read(media.hash)
             return media, data
         except FileNotFoundError:
-            raise HTTPException(status_code=404, detail=MediaErrors.NOT_FOUND)
+            raise MediaNotFoundError()
         except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+            raise MediaError(str(e), 500)
 
     @classmethod
     def create_or_replace(cls, db: Session, uuid: str, data: BinaryIO, filename: str, user: Optional[dict] = None) -> Media:
@@ -222,14 +222,13 @@ class MediaService:
         """
         media = db.query(Media).filter(Media.uuid == uuid).first()
         if not media:
-            raise HTTPException(status_code=404, detail=MediaErrors.NOT_FOUND)
+            raise MediaNotFoundError()
 
         if not media.allow_rewrite:
-            raise HTTPException(status_code=403, detail=MediaErrors.NO_REWRITE)
+            raise MediaNoRewriteError()
 
         if media.op_required and (not user or 'media_op' not in user.get('roles', [])):
-            raise HTTPException(
-                status_code=403, detail=MediaErrors.REQUIRES_OP)
+            raise MediaRequiresOpError()
 
         # Validate file size and extension
         cls._validate_file(media, data, filename)
@@ -275,7 +274,7 @@ class MediaService:
         except Exception as e:
             # Restore database state
             db.rollback()
-            raise HTTPException(status_code=500, detail=str(e))
+            raise MediaError(str(e), 500)
 
     @classmethod
     def remove(cls, db: Session, uuid: str, user: Optional[dict] = None) -> None:
@@ -293,14 +292,13 @@ class MediaService:
         """
         media = db.query(Media).filter(Media.uuid == uuid).first()
         if not media:
-            raise HTTPException(status_code=404, detail=MediaErrors.NOT_FOUND)
+            raise MediaNotFoundError()
 
         if not media.allow_rewrite:
-            raise HTTPException(status_code=403, detail=MediaErrors.NO_DELETE)
+            raise MediaNoDeleteError()
 
         if media.op_required and (not user or 'media_op' not in user.get('roles', [])):
-            raise HTTPException(
-                status_code=403, detail=MediaErrors.REQUIRES_OP)
+            raise MediaRequiresOpError()
 
         if media.hash:
             try:
@@ -311,7 +309,7 @@ class MediaService:
                 pass  # Ignore if file doesn't exist
             except Exception as e:
                 db.rollback()
-                raise HTTPException(status_code=500, detail=str(e))
+                raise MediaError(str(e), 500)
 
     @classmethod
     def unregister(cls, db: Session, uuid: str, force: bool = False) -> None:
@@ -329,10 +327,10 @@ class MediaService:
         """
         media = db.query(Media).filter(Media.uuid == uuid).first()
         if not media:
-            raise HTTPException(status_code=404, detail=MediaErrors.NOT_FOUND)
+            raise MediaNotFoundError()
 
         if media.hash and not force:
-            raise HTTPException(status_code=400, detail=MediaErrors.HAS_FILE)
+            raise MediaHasFileError()
 
         try:
             if media.hash:
@@ -345,4 +343,4 @@ class MediaService:
             db.commit()
         except Exception as e:
             db.rollback()
-            raise HTTPException(status_code=500, detail=str(e))
+            raise MediaError(str(e), 500)

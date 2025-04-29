@@ -33,6 +33,9 @@ class ActivityBase(BaseModel):
 class ActivityCreate(ActivityBase):
     pass
 
+class ActivityUpdate(ActivityBase):
+    pass
+
 class Activity(ActivityBase):
     id: int
 
