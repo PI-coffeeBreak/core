@@ -22,7 +22,7 @@ def get_plugin_details(plugin_name: str) -> PluginDetails:
         raise PluginNotFoundError(plugin_name)
     module = plugins_modules[plugin_name]
     return PluginDetails(
-        name=plugin_name,
+        name=getattr(module, 'NAME', plugin_name),
         has_register=hasattr(module, 'REGISTER'),
         has_unregister=hasattr(module, 'UNREGISTER'),
         has_router=hasattr(module, 'router'),
