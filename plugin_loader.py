@@ -88,16 +88,6 @@ async def plugin_unloader(app: APIRouter) -> None:
     if unload_tasks:
         await asyncio.gather(*unload_tasks)
 
-    _log_remaining_routes(app)
-
-
-def _log_remaining_routes(app: APIRouter) -> None:
-    """Log routes that remain after unloading plugins"""
-    logger.info("Remaining routes after unloading plugins:")
-    for route in app.routes:
-        logger.info(
-            f"  - {route.path} [{route.methods if hasattr(route, 'methods') else 'WebSocket'}]")
-
 
 async def _register_plugin(module) -> None:
     """Register a plugin using its REGISTER function"""
