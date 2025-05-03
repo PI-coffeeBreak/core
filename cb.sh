@@ -70,6 +70,11 @@ while [ $# -gt 0 ]; do
 done
 
 install_plugin_requirements() {
+  if [ ! -d "$PLUGINS_DIR" ]; then
+    echo "Plugin directory not found, skipping plugin dependency installation."
+    return
+  fi
+
   echo "Installing plugin dependencies..."
   find "$PLUGINS_DIR" -name requirements.txt -exec pip install --no-cache-dir -r {} \;
 }
