@@ -60,6 +60,9 @@ def _get_plugin_directories(plugins_dir: str) -> List[str]:
 
 async def plugin_loader(plugins_dir: str, app: APIRouter) -> None:
     """Load all plugins from the plugins directory"""
+    if not os.path.exists(plugins_dir):
+        return
+
     plugin_dirs = _get_plugin_directories(plugins_dir)
     load_tasks = []
 
