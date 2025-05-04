@@ -85,7 +85,7 @@ start_app() {
     -k uvicorn.workers.UvicornWorker \
     -w "$WORKERS" \
     -b "$HOST:$PORT" \
-    --log-config logging.conf
+    --log-config-json logging_config.json
 }
 
 case "$CMD" in
