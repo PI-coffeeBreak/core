@@ -27,7 +27,8 @@ def get_plugin_details(plugin_name: str) -> PluginDetails:
         has_unregister=hasattr(module, 'UNREGISTER'),
         has_router=hasattr(module, 'router'),
         is_loaded=is_plugin_loaded(plugin_name),
-        description=getattr(module, 'DESCRIPTION', "No description provided")
+        description=getattr(module, 'DESCRIPTION', "No description provided"),
+        config_page=getattr(module, 'CONFIG_PAGE', False),
     )
 
 def get_all_plugin_details() -> list[PluginDetails]:

@@ -13,3 +13,4 @@ class PluginDetails(BaseModel):
     has_router: bool
     is_loaded: bool
     description: str
+    config_page: bool
