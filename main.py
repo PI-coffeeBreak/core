@@ -65,4 +65,4 @@ app.router.lifespan_context = lifespan
 # --env-file <env_file>
 
 # For production, use:
-# gunicorn main:app -k uvicorn.workers.UvicornWorker -w <N_WORKERS> -b <HOST>:<PORT> --log-config logging.conf
+# gunicorn main:app -k uvicorn.workers.UvicornWorker -w <N_WORKERS> -b <HOST>:<PORT> --log-config-json logging_config.json

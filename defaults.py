@@ -1,8 +1,11 @@
 import logging
+from typing import List, Annotated
+
+from pydantic import Field, BaseModel
 from dependencies.mongodb import db
 from schemas.ui.menu import Menu, MenuOption
 from schemas.ui.color_theme import ColorTheme
-from schemas.ui.page import Page
+from schemas.ui.page import BaseComponentSchema, Page
 from schemas.ui.components.title import Title
 from schemas.ui.components.image import Image
 from schemas.ui.components.text import Text
@@ -181,6 +184,21 @@ async def register_default_components():
     logger.debug("Registered Location component")
     component_registry.register_component(Video)
     logger.debug("Registered Video component")
+
+    class TestComponent(BaseComponentSchema):
+        name: str = Field(default="Test Component")
+        numeros: List[int] = Field(default=[])
+    
+    component_registry.register_component(TestComponent)
+
+    class TestComponent2(BaseComponentSchema):
+        name: str = Field(default="Test Component 2")
+        numeros: Annotated[int, Field(title="Number")] \
+            | Annotated[str, Field(title="Text")] \
+            | Annotated[bool, Field(title="Flag")] \
+            | Annotated[list[Annotated[int, Field(ge=0, le=10)]], Field(title="Number List")] = Field(default=0)
+        
+    component_registry.register_component(TestComponent2)
 
 
 async def initialize_defaults():

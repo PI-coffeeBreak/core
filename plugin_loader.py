@@ -6,6 +6,9 @@ import asyncio
 from utils.api import Router
 from typing import List, Tuple, Optional
 from exceptions.plugin import PluginNotLoadedError
+import zipimport
+import sys
+
 logger = logging.getLogger("coffeebreak.core")
 
 plugins_modules = {}
@@ -23,45 +26,70 @@ def _is_valid_plugin_directory(dirname: str) -> bool:
 
 
 def _load_plugin_module(plugins_dir: str, plugin_name: str) -> Optional[Tuple[str, object]]:
-    """Load a plugin module from file"""
-    package_path = os.path.join(plugins_dir, plugin_name)
-    init_file = os.path.join(package_path, '__init__.py')
+    """Load a plugin module from .py package or .pyz archive"""
+    plugin_path = os.path.join(plugins_dir, plugin_name)
+    package = plugin_path.replace("/", ".")
 
-    if not os.path.exists(init_file):
+    if os.path.isdir(plugin_path):
+        init_file = os.path.join(plugin_path, '__init__.py')
+        if not os.path.exists(init_file):
+            return None
+
+        spec = importlib.util.spec_from_file_location(package, init_file)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+
+    elif os.path.isfile(plugin_path) and plugin_path.endswith(".pyz"):
+        plugin_name = os.path.splitext(plugin_name)[0]
+        module_name = plugin_name.replace("-", "_")
+        plugin_abs_path = os.path.abspath(plugin_path)
+
+        if plugin_abs_path not in sys.path:
+            sys.path.insert(0, plugin_abs_path)
+
+        try:
+            module = importlib.import_module(module_name)
+        except Exception as e:
+            logger.error(f"Error importing .pyz '{plugin_name}': {e}")
+            return None
+    else:
         return None
 
-    spec = importlib.util.spec_from_file_location(
-        package_path.replace("/", "."), init_file)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-
     missing_attrs = [
-        attr for attr in required_attributes if not hasattr(module, attr)]
+        attr for attr in required_attributes if not hasattr(module, attr)
+    ]
     if missing_attrs:
         logger.warning(
             f"Plugin {plugin_name} is missing required attributes: {', '.join(missing_attrs)} and will not be loaded")
         return None
 
     if not hasattr(module, 'UNREGISTER'):
-        logger.warning(
-            f"Plugin {plugin_name} does not have a UNREGISTER method")
-
+        logger.warning(f"Plugin {plugin_name} does not have a UNREGISTER method")
+    
+    if hasattr(module, 'IDENTIFIER'):
+        return module.IDENTIFIER, module
     return plugin_name, module
 
 
-def _get_plugin_directories(plugins_dir: str) -> List[str]:
-    """Get list of valid plugin directories"""
+def _get_plugin_entries(plugins_dir: str) -> List[str]:
+    """Get list of valid plugin directories or .pyz files"""
     return [
-        filename for filename in os.listdir(plugins_dir)
-        if os.path.isdir(os.path.join(plugins_dir, filename)) and
-        _is_valid_plugin_directory(filename)
+        name for name in os.listdir(plugins_dir)
+        if (
+            (_is_valid_plugin_directory(name) and os.path.isdir(os.path.join(plugins_dir, name)))
+            or name.endswith(".pyz")
+        )
     ]
 
 
 async def plugin_loader(plugins_dir: str, app: APIRouter) -> None:
     """Load all plugins from the plugins directory"""
-    plugin_dirs = _get_plugin_directories(plugins_dir)
+    if not os.path.exists(plugins_dir):
+        return
+
+    plugin_dirs = _get_plugin_entries(plugins_dir)
     load_tasks = []
+    logger.warning(f"plugins: {plugin_dirs}")
 
     for plugin_dir in plugin_dirs:
         result = _load_plugin_module(plugins_dir, plugin_dir)
@@ -87,16 +115,6 @@ async def plugin_unloader(app: APIRouter) -> None:
 
     if unload_tasks:
         await asyncio.gather(*unload_tasks)
-
-    _log_remaining_routes(app)
-
-
-def _log_remaining_routes(app: APIRouter) -> None:
-    """Log routes that remain after unloading plugins"""
-    logger.info("Remaining routes after unloading plugins:")
-    for route in app.routes:
-        logger.info(
-            f"  - {route.path} [{route.methods if hasattr(route, 'methods') else 'WebSocket'}]")
 
 
 async def _register_plugin(module) -> None:
