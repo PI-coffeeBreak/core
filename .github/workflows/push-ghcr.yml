@@ -31,7 +31,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Define Docker tag
+      - name: Define Docker tags
         id: vars
         run: |
           if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
@@ -43,17 +43,15 @@ jobs:
             echo "tag1=$TAG" >> $GITHUB_OUTPUT
           fi
 
-      - name: Build Docker image
-        run: |
-          docker build -t $REGISTRY/$REGISTRY_OWNER/$IMAGE_NAME:${{ steps.vars.outputs.tag1 }} .
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: Push Docker image
-        run: |
-          docker push $REGISTRY/$REGISTRY_OWNER/$IMAGE_NAME:${{ steps.vars.outputs.tag1 }}
-
-      - name: Tag and push 'latest' (if release)
-        if: steps.vars.outputs.tag2 != ''
-        run: |
-          docker tag $REGISTRY/$REGISTRY_OWNER/$IMAGE_NAME:${{ steps.vars.outputs.tag1 }} \
-                     $REGISTRY/$REGISTRY_OWNER/$IMAGE_NAME:${{ steps.vars.outputs.tag2 }}
-          docker push $REGISTRY/$REGISTRY_OWNER/$IMAGE_NAME:${{ steps.vars.outputs.tag2 }}
+      - name: Build and push Docker image (multi-arch)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.REGISTRY_OWNER }}/${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.tag1 }}
+            ${{ steps.vars.outputs.tag2 && format('{0}/{1}/{2}:{3}', env.REGISTRY, env.REGISTRY_OWNER, env.IMAGE_NAME, steps.vars.outputs.tag2) }}
