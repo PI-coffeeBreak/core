@@ -20,3 +20,15 @@ from models.notification import \
 
 from models.ui.color_theme import \
     ColorTheme as ColorThemeModel
+
+__all__ = [
+    "ActivityModel",
+    "ActivityTypeModel",
+    "EventInfoModel",
+    "SystemEventModel",
+    "MediaModel",
+    "MessageModel",
+    "NotificationModel",
+    "NotificationReadModel",
+    "ColorThemeModel"
+]

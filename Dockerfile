@@ -10,7 +10,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 COPY cb.sh /cb.sh
-RUN chmod +x /cb.sh
+RUN chmod 500 /cb.sh \
+    && addgroup -S user \
+    && adduser -S user -G user \
+    && chown user:user /cb.sh
+
+USER user
 
 EXPOSE 8080
 
