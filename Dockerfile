@@ -7,10 +7,9 @@ RUN apk add --no-cache inotify-tools libmagic postgresql-dev
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+COPY . /app
 
-COPY cb.sh /cb.sh
-RUN chmod 500 /cb.sh \
+RUN chmod 500 cb.sh \
     && addgroup -S user \
     && adduser -S user -G user \
     && chown -R user:user /app
@@ -19,4 +18,4 @@ USER user
 
 EXPOSE 8080
 
-CMD ["/cb.sh", "start"]
+CMD ["./cb.sh", "start"]
