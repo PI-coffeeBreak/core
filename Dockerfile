@@ -13,7 +13,7 @@ COPY cb.sh /cb.sh
 RUN chmod 500 /cb.sh \
     && addgroup -S user \
     && adduser -S user -G user \
-    && chown user:user /cb.sh
+    && chown -R user:user /app
 
 USER user
 
