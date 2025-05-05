@@ -4,25 +4,23 @@ from pydantic import BaseModel
 class SelectorInput(BaseModel):
     type: str = "selector"
     title: str
+    name: Optional[str] = None
     description: str
     options: List[str]
 
 class TextInput(BaseModel):
     type: str = "text"
     title: str
+    name: Optional[str] = None
     description: Optional[str] = None
     placeholder: Optional[str] = None
-
-class ShortTextInput(BaseModel):
-    type: str = "shortText"
-    title: str
-    description: Optional[str] = None
-    placeholder: Optional[str] = None
-    max_length: Optional[int] = 250
+    max_length: Optional[int] = None
+    default: Optional[str] = None
 
 class ToggleInput(BaseModel):
     type: str = "toggle"
     title: str
+    name: Optional[str] = None
     description: Optional[str] = None
     text: Optional[str] = None
     default: bool = False
@@ -31,37 +29,26 @@ class ToggleInput(BaseModel):
 class CheckboxInput(BaseModel):
     type: str = "checkbox"
     title: str
+    name: Optional[str] = None
     description: Optional[str] = None
-    options: List[str]  # Options to select from
-    default: Optional[List[str]] = None  # Default selected options
-
-class RadioInput(BaseModel):
-    type: str = "radio"
-    title: str
-    description: Optional[str] = None
-    options: List[str]  # Options to select from
-    default: Optional[str] = None
-    required: bool = False
-
-class ComposedTextInput(BaseModel):
-    type: str = "composedText"
-    title: str
-    name: str
-    description: str
+    options: List[str]
+    default: Optional[List[str]] = None
 
 class NumberInput(BaseModel):
     type: str = "number"
     title: str
-    description: str
-    min: int
-    max: int
-    step: int
-    default: int
+    name: Optional[str] = None
+    description: str = ""
+    min: int = 0
+    max: int = 100
+    step: int = 1
+    default: int = 0
 
 class PluginSetting(BaseModel):
     title: str
+    name: Optional[str] = None
     description: str
-    inputs: List[Union[SelectorInput, TextInput, ShortTextInput, CheckboxInput, ToggleInput, RadioInput, ComposedTextInput, NumberInput]]
+    inputs: List[Union[SelectorInput, TextInput, CheckboxInput, ToggleInput, NumberInput]]
 
 # Example usage
 example_json = {

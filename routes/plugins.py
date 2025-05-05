@@ -45,7 +45,7 @@ async def fetch_plugin_endpoint(plugin_name: str, current_user: dict = Depends(c
 @router.post("/submit-settings/{plugin_name}", response_model=dict)
 async def submit_settings_endpoint(plugin_name: str, settings: PluginSettings, current_user: dict = Depends(check_role(["manage_plugins"]))):
     try:
-        await update_plugin_settings(plugin_name, settings.settings)
-        return {"status": "success", "message": f"Settings for {plugin_name} submitted"}
+        result = update_plugin_settings(plugin_name, settings.settings)
+        return {"status": "success", "message": f"Settings for {plugin_name} submitted", "settings": result}
     except PluginError as e:
         raise HTTPException(status_code=e.status_code, detail=str(e))
