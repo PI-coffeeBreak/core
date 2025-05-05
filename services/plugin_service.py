@@ -65,6 +65,7 @@ def get_plugin_details(plugin_name: str) -> PluginDetails:
     module = plugins_modules[plugin_name]
     return PluginDetails(
         name=getattr(module, 'NAME', plugin_name),
+        title=getattr(module, 'TITLE', plugin_name),
         has_register=hasattr(module, 'REGISTER'),
         has_unregister=hasattr(module, 'UNREGISTER'),
         has_router=hasattr(module, 'router'),
