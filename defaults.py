@@ -12,7 +12,7 @@ from schemas.ui.components.text import Text
 from schemas.ui.components.button import Button
 from schemas.ui.components.location import Location
 from schemas.ui.components.video import Video
-from schemas.ui.components.activicties import Activities
+from core.schemas.ui.components.activities import Activities
 from services.component_registry import ComponentRegistry
 from services.media import MediaService
 from repository.media import LocalMediaRepo
