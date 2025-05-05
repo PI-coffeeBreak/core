@@ -56,6 +56,55 @@ def update_plugin_settings(plugin_name: str, form_data: dict) -> dict:
     logger.info(f"Updated settings for plugin '{plugin_name}': {form_data}")
     return form_data  # Return the form data
 
+def get_plugin_settings(plugin_name: str) -> dict:
+    """Get the current settings for a plugin
+    
+    Args:
+        plugin_name: The name of the plugin
+        
+    Returns:
+        The plugin's settings as a dictionary
+        
+    Raises:
+        PluginNotFoundError: If the plugin doesn't exist
+        PluginSettingsError: If the plugin doesn't have SETTINGS
+    """
+    if plugin_name not in plugins_modules:
+        raise PluginNotFoundError(plugin_name)
+        
+    module = plugins_modules[plugin_name]
+    
+    if not hasattr(module, 'SETTINGS'):
+        raise PluginSettingsError(plugin_name)
+    
+    # Get existing settings object
+    settings = module.SETTINGS
+    
+    # For Pydantic BaseModel settings
+    if hasattr(settings, 'model_dump') and callable(getattr(settings, 'model_dump')):
+        return settings.model_dump()
+    elif hasattr(settings, 'dict') and callable(getattr(settings, 'dict')):
+        # For older pydantic versions
+        return settings.dict()
+    
+    # For dictionary settings
+    if isinstance(settings, dict):
+        return settings
+    
+    # For custom objects, try to convert to dict
+    try:
+        return dict(settings)
+    except:
+        pass
+    
+    # Fallback to __dict__
+    if hasattr(settings, '__dict__'):
+        return settings.__dict__
+    
+    # If all else fails, return empty dict
+    logger.warning(f"Unable to convert settings for plugin '{plugin_name}' to dict")
+    return {}
+
 def is_plugin_loaded(plugin_name: str) -> bool:
     return plugin_name in registered_plugins
 

@@ -75,29 +75,54 @@ def generate_inputs_from_settings(settings_class: Type[BaseModel]) -> List[Any]:
                 field_type = field.annotation
                 field_default = field.default
                 
-                # Extract title and description
-                title = field.json_schema_extra.get('title', field_name.replace('_', ' ').title()) if field.json_schema_extra else field_name.replace('_', ' ').title()
-                description = field.json_schema_extra.get('description', "") if field.json_schema_extra else ""
+                # Extract title, description and other properties directly from field_info
+                title = field_info.get('title', field_name.replace('_', ' ').title())
                 
+                # Extract description properly from field_info
+                description = field_info.get('description', "")
+                
+                # Additional field properties
+                placeholder = None
+                if field.json_schema_extra and 'placeholder' in field.json_schema_extra:
+                    placeholder = field.json_schema_extra['placeholder']
+                
+                max_length = None
+                if field.json_schema_extra and 'max_length' in field.json_schema_extra:
+                    max_length = field.json_schema_extra['max_length']
+                elif 'maxLength' in field_info:
+                    max_length = field_info['maxLength']
+                
+                # Generate the appropriate input based on field type
                 if field_type == bool:
+                    text = None
+                    if field.json_schema_extra and 'text' in field.json_schema_extra:
+                        text = field.json_schema_extra['text']
+
                     # Boolean fields become toggles
                     inputs.append(ToggleInput(
                         title=title,
                         name=field_name,
-                        description=description or "",
-                        default=field_default
+                        description=description,
+                        default=field_default,
+                        text=text,
                     ))
                     
                 elif field_type == int or field_type == float:
                     # Number fields
-                    min_val = field.json_schema_extra.get('gt', 0) if field.json_schema_extra else 0
-                    max_val = field.json_schema_extra.get('le', 100) if field.json_schema_extra else 100
+                    min_val = field_info.get('minimum', 0)
+                    if min_val is None and field.json_schema_extra and 'gt' in field.json_schema_extra:
+                        min_val = field.json_schema_extra['gt']
+                    
+                    max_val = field_info.get('maximum', 100)
+                    if max_val is None and field.json_schema_extra and 'le' in field.json_schema_extra:
+                        max_val = field.json_schema_extra['le']
+                    
                     step_val = 1
                     
                     inputs.append(NumberInput(
                         title=title,
                         name=field_name,
-                        description=description or "",
+                        description=description,
                         min=min_val,
                         max=max_val,
                         step=step_val,
@@ -106,7 +131,9 @@ def generate_inputs_from_settings(settings_class: Type[BaseModel]) -> List[Any]:
                     
                 elif field_type == str:
                     # Check if we have options for a selector
-                    options = field.json_schema_extra.get('options', None) if field.json_schema_extra else None
+                    options = None
+                    if field.json_schema_extra and 'options' in field.json_schema_extra:
+                        options = field.json_schema_extra['options']
                     
                     if options:
                         # If options are provided, create a selector
@@ -123,12 +150,16 @@ def generate_inputs_from_settings(settings_class: Type[BaseModel]) -> List[Any]:
                             title=title,
                             name=field_name,
                             description=description,
+                            placeholder=placeholder,
+                            max_length=max_length,
                             default=field_default
                         ))
                         
                 elif field_type == List[str] or str(field_type).startswith('list'):
                     # List fields become checkboxes
-                    options = field.json_schema_extra.get('options', []) if field.json_schema_extra else []
+                    options = []
+                    if field.json_schema_extra and 'options' in field.json_schema_extra:
+                        options = field.json_schema_extra['options']
                     
                     inputs.append(CheckboxInput(
                         title=title,
@@ -143,7 +174,7 @@ def generate_inputs_from_settings(settings_class: Type[BaseModel]) -> List[Any]:
                     inputs.append(TextInput(
                         title=title,
                         name=field_name,
-                        description=description or "",
+                        description=description,
                         default=""
                     ))
             except Exception as e:
