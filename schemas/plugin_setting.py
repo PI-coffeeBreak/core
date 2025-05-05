@@ -10,10 +10,15 @@ class SelectorInput(BaseModel):
 class TextInput(BaseModel):
     type: str = "text"
     title: str
+    description: Optional[str] = None
+    placeholder: Optional[str] = None
 
 class ShortTextInput(BaseModel):
     type: str = "shortText"
     title: str
+    description: Optional[str] = None
+    placeholder: Optional[str] = None
+    max_length: Optional[int] = 250
 
 class ToggleInput(BaseModel):
     type: str = "toggle"
