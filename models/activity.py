@@ -7,7 +7,7 @@ class ActivityType(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     type = Column(String, nullable=False)
-
+    color = Column(String, nullable=True)
     activities = relationship("Activity", back_populates="type")
 
 class Activity(Base):
