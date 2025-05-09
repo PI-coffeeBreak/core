@@ -170,7 +170,11 @@ def _remove_plugin_routes(app: APIRouter, module) -> None:
         return
 
     router = module.router.get_router()
-    app.routes = [route for route in app.routes if route not in router.routes]
+
+    for i, route in enumerate(app.routes):
+        if hasattr(route, 'routes') and route.routes == router.routes:
+            app.routes.pop(i)
+            break
 
 
 async def unload_plugin(app: APIRouter, plugin_name: str) -> bool:
