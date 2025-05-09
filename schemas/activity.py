@@ -4,6 +4,7 @@ from datetime import datetime
 
 class ActivityTypeBase(BaseModel):
     type: str
+    color: str
 
 class ActivityTypeCreate(ActivityTypeBase):
     pass
