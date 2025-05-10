@@ -1,6 +1,7 @@
 from typing import List
 from sqlalchemy.orm import Session
 from models.activity import Activity, ActivityType
+from models.activity_owner import ActivityOwner
 from schemas.activity import (
     ActivityCreate,
     ActivityUpdate,
@@ -232,4 +233,42 @@ class ActivityService:
         if activity.date and activity.duration and activity.date.timestamp() + activity.duration * 60 <= activity.date.timestamp():
             errors.append(ActivityErrors.START_TIME_AFTER_END)
 
-        return errors 
+        return errors
+
+    def add_owner(self, activity_id: int, user_id: str) -> ActivityOwner:
+        """Add an owner to an activity"""
+        activity = self.get_by_id(activity_id)
+        
+        # Check if owner already exists
+        existing_owner = self.db.query(ActivityOwner).filter(
+            ActivityOwner.activity_id == activity_id,
+            ActivityOwner.user_id == user_id
+        ).first()
+        
+        if existing_owner:
+            return existing_owner
+            
+        owner = ActivityOwner(activity_id=activity_id, user_id=user_id)
+        self.db.add(owner)
+        self.db.commit()
+        self.db.refresh(owner)
+        return owner
+
+    def remove_owner(self, activity_id: int, user_id: str) -> ActivityOwner:
+        """Remove an owner from an activity"""
+        owner = self.db.query(ActivityOwner).filter(
+            ActivityOwner.activity_id == activity_id,
+            ActivityOwner.user_id == user_id
+        ).first()
+        
+        if not owner:
+            raise ActivityNotFoundError(activity_id)
+            
+        self.db.delete(owner)
+        self.db.commit()
+        return owner
+
+    def get_owners(self, activity_id: int) -> List[ActivityOwner]:
+        """Get all owners of an activity"""
+        activity = self.get_by_id(activity_id)
+        return self.db.query(ActivityOwner).filter(ActivityOwner.activity_id == activity_id).all() 
