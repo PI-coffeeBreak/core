@@ -25,7 +25,6 @@ class ActivityBase(BaseModel):
     type_id: int
 
     topic: Optional[str] = None
-    speaker: Optional[str] = None
     facilitator: Optional[str] = None
 
     class Config:
