@@ -74,3 +74,9 @@ class GroupErrors(StrEnum):
     CREATE_ERROR = "Failed to create group: {error}"
     ADD_USER_ERROR = "Failed to add user to group: {error}"
     GET_USERS_ERROR = "Failed to get users in group: {error}"
+
+class ManifestErrors(StrEnum):
+    """Manifest service error messages"""
+    NOT_FOUND = "Manifest not found"
+    UPDATE_ERROR = "Failed to update manifest: {error}"
+    INSERT_ICON_ERROR = "Failed to insert icon: {error}"

@@ -33,6 +33,9 @@ from constants.gzip import \
 from constants.local_media_repo import \
     LOCAL_MEDIA_REPO_PATH
 
+from constants.mime_types import \
+    MimeTypes
+
 __all__ = [
     "MAX_NAME_LENGTH",
     "MAX_DESCRIPTION_LENGTH",
@@ -56,5 +59,6 @@ __all__ = [
     "GZIP_MINIMUM_SIZE",
     "LOCAL_MEDIA_REPO_PATH",
     "UserErrors",
-    "GroupErrors"
+    "GroupErrors",
+    "MimeTypes"
 ]
