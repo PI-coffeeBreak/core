@@ -18,10 +18,14 @@ from services.media import MediaService
 from repository.media import LocalMediaRepo
 from models.media import Media
 from exceptions.manifest import ManifestNotFoundError
+from schemas.favicon import Favicon
+from services.favicon import FaviconService
+from exceptions.favicon import FaviconNotFoundError
+from constants.mime_types import MimeTypes
+
 import os
 from sqlalchemy.orm import Session
 from dependencies.database import get_db
-from constants.mime_types import MimeTypes
 
 logger = logging.getLogger("coffeebreak")
 
@@ -163,6 +167,19 @@ async def create_default_manifest():
         )
         await manifest_service.update_manifest(default_manifest)
 
+async def create_default_favicon():
+    """Creates the default favicon if it doesn't exist"""
+    # type="image/svg+xml" href="/vite.svg"
+    favicon_service = FaviconService()
+    try:
+        _favicon = await favicon_service.get_favicon()
+    except FaviconNotFoundError:
+        default_favicon = Favicon(
+            url="/vite.svg",
+            type=MimeTypes.SVG
+        )
+        await favicon_service.store_favicon(default_favicon)
+
 async def initialize_defaults():
     """Initialize all default data"""
     logger.info("Initializing default data...")
@@ -177,4 +194,5 @@ async def initialize_defaults():
     await create_default_pages()
     await create_default_color_theme()
     await create_default_manifest()
+    await create_default_favicon()
     logger.info("Default data initialization completed")

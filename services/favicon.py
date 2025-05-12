@@ -1,6 +1,6 @@
 from schemas.favicon import Favicon
 from dependencies.mongodb import db
-
+from exceptions.favicon import FaviconNotFoundError
 class FaviconService:
     _instance = None
     _collection_name = "favicon"
@@ -21,7 +21,7 @@ class FaviconService:
         """
         await self.collection.update_one(
             {"_id": "current"},
-            {"$set": {"url": favicon.url}},
+            {"$set": {"url": favicon.url, "type": favicon.type}},
             upsert=True
         )
 
@@ -31,8 +31,9 @@ class FaviconService:
         """
         result = await self.collection.find_one({"_id": "current"})
         if result:
-            return Favicon(url=result["url"])
-        return Favicon(url="")  # Return empty favicon if none exists
+            return Favicon(url=result["url"], type=result["type"])
+        else:
+            raise FaviconNotFoundError()
 
 
 

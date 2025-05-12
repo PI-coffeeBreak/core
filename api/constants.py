@@ -15,7 +15,9 @@ from constants.errors import \
     NotificationErrors, \
     PluginErrors, \
     UserErrors, \
-    GroupErrors
+    GroupErrors, \
+    ManifestErrors, \
+    FaviconErrors
 
 from constants.extensions import \
     Extension, \
@@ -60,5 +62,7 @@ __all__ = [
     "LOCAL_MEDIA_REPO_PATH",
     "UserErrors",
     "GroupErrors",
+    "ManifestErrors",
+    "FaviconErrors",
     "MimeTypes"
 ]
