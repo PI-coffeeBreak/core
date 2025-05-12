@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 # All routers should be imported here, otherwise they will not be included in the API
-from . import users, activities, activity_types, auth, plugins, totp, notifications, media, event_info, health
+from . import users, activities, activity_types, auth, plugins, totp, notifications, media, event_info, health, websocket
 from .ui import color_themes, page, main_menu, plugin_settings
 from .components import router as components_router
 
@@ -30,6 +30,7 @@ routes_app.include_router(plugin_settings.router,
                           prefix="/ui/plugin-config", tags=["Plugin Settings"])
 routes_app.include_router(
     color_themes.router, prefix="/ui/color-theme", tags=["Color Theme"])
+routes_app.include_router(websocket.router, tags=["WebSocket"])
 
 # Include component registry router
 routes_app.include_router(

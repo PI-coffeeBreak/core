@@ -6,12 +6,11 @@ import uuid
 import logging
 import json
 import asyncio
-from dependencies.app import get_current_app
 
 logger = logging.getLogger("coffeebreak.websocket")
 
 # Configure CORS for WebSocket
-app = get_current_app()
+router = APIRouter()
 
 async def send_subscription_confirmation(websocket: WebSocket, topic: str, status: str, message: str = None):
     """Helper function to send subscription confirmation"""
@@ -29,7 +28,7 @@ async def send_subscription_confirmation(websocket: WebSocket, topic: str, statu
     except Exception as e:
         logger.error(f"Failed to send subscription confirmation: {str(e)}")
 
-@app.websocket("/ws")
+@router.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     """
     WebSocket endpoint for real-time communication
