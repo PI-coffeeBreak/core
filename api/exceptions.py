@@ -49,6 +49,16 @@ from exceptions.plugin import \
     PluginNotLoadedError, \
     PluginSettingsError
 
+from exceptions.manifest import \
+    ManifestException, \
+    ManifestNotFoundError, \
+    ManifestUpdateError, \
+    ManifestInsertIconError
+
+from exceptions.favicon import \
+    FaviconException, \
+    FaviconNotFoundError
+
 from exceptions.user import \
     UserError, \
     UserNotFoundError, \
@@ -112,5 +122,11 @@ __all__ = [
     "GroupListError",
     "GroupCreateError",
     "GroupAddUserError",
-    "GroupGetUsersError"
+    "GroupGetUsersError",
+    "ManifestException",
+    "ManifestNotFoundError",
+    "ManifestUpdateError",
+    "ManifestInsertIconError",
+    "FaviconException",
+    "FaviconNotFoundError"
 ]

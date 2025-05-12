@@ -80,3 +80,7 @@ class ManifestErrors(StrEnum):
     NOT_FOUND = "Manifest not found"
     UPDATE_ERROR = "Failed to update manifest: {error}"
     INSERT_ICON_ERROR = "Failed to insert icon: {error}"
+
+class FaviconErrors(StrEnum):
+    """Favicon service error messages"""
+    NOT_FOUND = "Favicon not found"
