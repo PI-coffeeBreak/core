@@ -1,5 +1,7 @@
 from dotenv import load_dotenv
 import os
+import fcntl
+import tempfile
 
 # Load environment variables from .env file
 load_dotenv()
@@ -25,17 +27,42 @@ import middlewares # setup middlewares here
 
 from routes import routes_app
 
+def acquire_db_lock():
+    """Acquire a file lock to ensure only one worker initializes the database"""
+    lock_file = os.path.join(tempfile.gettempdir(), 'coffeebreak_db.lock')
+    lock_fd = open(lock_file, 'w')
+    try:
+        fcntl.flock(lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        return lock_fd
+    except IOError:
+        # Another worker has the lock
+        lock_fd.close()
+        return None
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Load all plugins first
     await plugin_loader('plugins', routes_app)
 
-    # Create database tables after plugins are loaded
-    try:
-        Base.metadata.create_all(bind=engine)
-    except OperationalError as e:
-        logger.error(f"Error creating database tables: {e}")
-        raise RuntimeError("Error creating database tables")
+    # Try to acquire the database lock
+    lock_fd = acquire_db_lock()
+    
+    if lock_fd is not None:
+        try:
+            # Create tables with checkfirst=True to avoid errors with existing objects
+            Base.metadata.create_all(bind=engine, checkfirst=True)
+        except OperationalError as e:
+            logger.error(f"Database connection error: {e}")
+            raise RuntimeError("Could not connect to the database")
+        except Exception as e:
+            logger.error(f"Error managing database tables: {e}")
+            raise RuntimeError(f"Error managing database tables: {str(e)}")
+        finally:
+            # Release the lock
+            fcntl.flock(lock_fd, fcntl.LOCK_UN)
+            lock_fd.close()
+    else:
+        logger.info("Another worker is initializing the database, skipping...")
 
     # Include all routers from routes/__init__.py after plugins
     app.include_router(routes_app)
