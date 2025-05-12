@@ -175,7 +175,7 @@ async def create_default_favicon():
         _favicon = await favicon_service.get_favicon()
     except FaviconNotFoundError:
         default_favicon = Favicon(
-            url="/vite.svg",
+            url="/giant_white_bean.svg",
             type=MimeTypes.SVG
         )
         await favicon_service.store_favicon(default_favicon)
