@@ -1,4 +1,3 @@
-from fastapi import HTTPException, status
 from constants.errors import NotificationErrors
 
 class NotificationError(Exception):
