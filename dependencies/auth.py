@@ -49,7 +49,7 @@ keycloak_openid = KeycloakOpenID(
     client_id=KEYCLOAK_CLIENT_ID,
     realm_name=KEYCLOAK_REALM,
     client_secret_key=KEYCLOAK_CLIENT_SECRET,
-    verify=False
+    verify=os.getenv("ENVIRONMENT", "development") == "production"
 )
 
 # Initialize Keycloak Admin (for group management, using the client credentials)
@@ -58,7 +58,7 @@ keycloak_admin = KeycloakAdmin(
     realm_name=KEYCLOAK_REALM,
     client_id=KEYCLOAK_CLIENT_ID,
     client_secret_key=KEYCLOAK_CLIENT_SECRET,
-    verify=False
+    verify=os.getenv("ENVIRONMENT", "development") == "production"
 )
 
 oauth2_scheme = OAuth2PasswordBearer(
