@@ -8,9 +8,10 @@ from models.event_info import Event as EventInfoModel
 from schemas.event_info import EventInfo, EventInfoCreate, EventInfoCreateFirstUser
 from services.media import MediaService
 from services.user_service import assign_role_to_user
+from services.manifest import ManifestService
 
 router = APIRouter()
-
+manifest_service = ManifestService()
 
 @router.get("/event", response_model=EventInfo, summary="Get current event information")
 async def get_event(request: Request, db: Session = Depends(get_db)):
@@ -50,6 +51,12 @@ async def create_event(
     # Assign cb-organizer role to first user
     await assign_role_to_user(event.first_user_id, "cb-organizer")
 
+    # Update manifest with event information
+    manifest = await manifest_service.get_manifest()
+    manifest.name = event.name
+    manifest.description = event.description
+    await manifest_service.update_manifest(manifest)
+
     return EventInfo.model_validate(db_event)
 
 
@@ -58,7 +65,7 @@ async def create_or_update_event_admin(
     request: Request,
     event: EventInfoCreate,
     db: Session = Depends(get_db),
-    user_info: dict = Depends(check_role(["admin", "manage_event"]))
+    _current_user: dict = Depends(check_role(["manage_event"]))
 ):
     existing_event = db.query(EventInfoModel).first()
 
@@ -82,6 +89,12 @@ async def create_or_update_event_admin(
     db.add(db_event)
     db.commit()
     db.refresh(db_event)
+
+    # Update manifest with event information
+    manifest = await manifest_service.get_manifest()
+    manifest.name = event.name
+    manifest.description = event.description
+    await manifest_service.update_manifest(manifest)
     return EventInfo.model_validate(db_event)
 
 

@@ -11,13 +11,17 @@ from schemas.ui.components.button import Button
 from schemas.ui.components.location import Location
 from schemas.ui.components.video import Video
 from schemas.ui.components.activities import Activities
+from schemas.manifest import Manifest
+from services.manifest import ManifestService
 from services.component_registry import ComponentRegistry
 from services.media import MediaService
 from repository.media import LocalMediaRepo
 from models.media import Media
+from exceptions.manifest import ManifestNotFoundError
 import os
 from sqlalchemy.orm import Session
 from dependencies.database import get_db
+from constants.mime_types import MimeTypes
 
 logger = logging.getLogger("coffeebreak")
 
@@ -132,6 +136,32 @@ async def register_default_components():
     component_registry.register_component(Activities)
     logger.debug("Registered Activities component")
 
+async def create_default_manifest():
+    """Creates the default manifest if it doesn't exist"""
+    manifest_service = ManifestService()
+    try:
+        _manifest = await manifest_service.get_manifest()
+    except ManifestNotFoundError:
+        # Criar manifesto padrão se não existir
+        default_manifest = Manifest(
+            id="/app?source=pwa",
+            name="coffeeBreak",
+            short_name="coffeeBreak",
+            description="An app to manage events",
+            display="standalone",
+            orientation="portrait",
+            scope="/app",
+            start_url="/app?source=pwa",
+            background_color="#ffffff",
+            theme_color="#ffffff",
+            icons=[
+                {"src": "/pwa-192x192.png", "sizes": "192x192", "type": MimeTypes.PNG, "purpose": "any"},
+                {"src": "/pwa-512x512.png", "sizes": "512x512", "type": MimeTypes.PNG, "purpose": "any"},
+                {"src": "/pwa-192x192.png", "sizes": "192x192", "type": MimeTypes.PNG, "purpose": "maskable"},
+                {"src": "/pwa-512x512.png", "sizes": "512x512", "type": MimeTypes.PNG, "purpose": "maskable"},
+            ]
+        )
+        await manifest_service.update_manifest(default_manifest)
 
 async def initialize_defaults():
     """Initialize all default data"""
@@ -146,4 +176,5 @@ async def initialize_defaults():
     await register_default_components()
     await create_default_pages()
     await create_default_color_theme()
+    await create_default_manifest()
     logger.info("Default data initialization completed")

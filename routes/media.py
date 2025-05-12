@@ -16,7 +16,7 @@ router = APIRouter()
 @router.post("/register", response_model=MediaResponse)
 async def register_media(
     db: Session = Depends(get_db),
-    user: Optional[dict] = Depends(check_role(['customization']))
+    user: Optional[dict] = Depends(check_role(['manage_event']))
 ):
     """Register a new media object before upload"""
     try:
