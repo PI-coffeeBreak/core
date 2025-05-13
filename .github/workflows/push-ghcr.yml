@@ -1,0 +1,57 @@
+name: Build and Push Docker Image to GHCR
+
+on:
+  push:
+    branches:
+      - SCRUM-249-Deploy-containers-workflow
+    tags:
+      - 'v*'
+
+env:
+  IMAGE_NAME: core
+  REGISTRY_OWNER: pi-coffeebreak
+  REGISTRY: ghcr.io
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Define Docker tags
+        id: vars
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            TAG=${GITHUB_REF#refs/tags/}
+            echo "tag1=$TAG" >> $GITHUB_OUTPUT
+            echo "tag2=latest" >> $GITHUB_OUTPUT
+          else
+            TAG=unstable-$(date +'%y%V%u')
+            echo "tag1=$TAG" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push Docker image (multi-arch)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.REGISTRY_OWNER }}/${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.tag1 }}
+            ${{ steps.vars.outputs.tag2 && format('{0}/{1}/{2}:{3}', env.REGISTRY, env.REGISTRY_OWNER, env.IMAGE_NAME, steps.vars.outputs.tag2) }}

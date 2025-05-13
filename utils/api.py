@@ -1,8 +1,9 @@
 import logging
 from typing import Callable, Dict, List
-from fastapi import WebSocket, Depends
+from fastapi import WebSocket, Depends, HTTPException
 
 logger = logging.getLogger("plugin_router")
+
 
 class Router:
     """A framework-agnostic router that allows plugins to register routes without depending on FastAPI."""
@@ -88,12 +89,13 @@ class Router:
         """Decorator for defining an event handler (e.g., startup, shutdown)."""
         if event not in ["startup", "shutdown"]:
             raise ValueError("Event must be either 'startup' or 'shutdown'.")
+
         def wrapper(handler: Callable):
             self.events[event] = handler
             return handler
         return wrapper
 
-    def include_router(self, router, prefix: str):
+    def include_router(self, router, prefix: str = "/"):
         for route in router.routes:
             route["path"] = f"{prefix}{route['path']}"
             self.routes.append(route)
@@ -107,15 +109,20 @@ class Router:
             router = APIRouter()
             for route in self.routes:
                 if route["method"] == "GET":
-                    router.get(route["path"], response_model=route["response_model"])(route["handler"])
+                    router.get(route["path"], response_model=route["response_model"])(
+                        route["handler"])
                 elif route["method"] == "POST":
-                    router.post(route["path"], response_model=route["response_model"])(route["handler"])
+                    router.post(route["path"], response_model=route["response_model"])(
+                        route["handler"])
                 elif route["method"] == "PUT":
-                    router.put(route["path"], response_model=route["response_model"])(route["handler"])
+                    router.put(route["path"], response_model=route["response_model"])(
+                        route["handler"])
                 elif route["method"] == "DELETE":
-                    router.delete(route["path"], response_model=route["response_model"])(route["handler"])
+                    router.delete(route["path"], response_model=route["response_model"])(
+                        route["handler"])
                 elif route["method"] == "PATCH":
-                    router.patch(route["path"], response_model=route["response_model"])(route["handler"])
+                    router.patch(route["path"], response_model=route["response_model"])(
+                        route["handler"])
                 elif route["method"] == "OPTIONS":
                     router.options(route["path"])(route["handler"])
                 elif route["method"] == "HEAD":
@@ -130,7 +137,8 @@ class Router:
 
             return router
         except ImportError:
-            logger.warning("FastAPI is not installed. Routes will not be registered.")
+            logger.warning(
+                "FastAPI is not installed. Routes will not be registered.")
             return None
 
     def __str__(self):

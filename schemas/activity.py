@@ -4,6 +4,7 @@ from datetime import datetime
 
 class ActivityTypeBase(BaseModel):
     type: str
+    color: str
 
 class ActivityTypeCreate(ActivityTypeBase):
     pass
@@ -24,13 +25,15 @@ class ActivityBase(BaseModel):
     type_id: int
 
     topic: Optional[str] = None
-    speaker: Optional[str] = None
     facilitator: Optional[str] = None
 
     class Config:
         arbitrary_types_allowed = True
 
 class ActivityCreate(ActivityBase):
+    pass
+
+class ActivityUpdate(ActivityBase):
     pass
 
 class Activity(ActivityBase):

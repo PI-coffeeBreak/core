@@ -1,15 +1,23 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List
+from uuid import uuid4
 
-class MenuOption(BaseModel):
+
+class MenuOptionCreate(BaseModel):
     icon: str
     label: str
     href: str
 
+
+class MenuOption(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid4()))
+    icon: str
+    label: str
+    href: str
+
+
 class Menu(BaseModel):
     options: List[MenuOption]
-
-
 
 
 # usage example
@@ -26,6 +34,8 @@ if __name__ == "__main__":
 
     insert_menu(Menu(options=[
         MenuOption(icon="home", label="Home", href="https://www.example.com"),
-        MenuOption(icon="settings", label="Settings", href="https://www.example.com"),
-        MenuOption(icon="logout", label="Logout", href="https://www.example.com")
+        MenuOption(icon="settings", label="Settings",
+                   href="https://www.example.com"),
+        MenuOption(icon="logout", label="Logout",
+                   href="https://www.example.com")
     ]))

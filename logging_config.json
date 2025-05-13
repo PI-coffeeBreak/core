@@ -22,37 +22,36 @@
         "class": "logging.StreamHandler",
         "formatter": "colored",
         "level": "DEBUG"
-      },
-      "file": {
-        "class": "logging.FileHandler",
-        "formatter": "standard",
-        "filename": "app.log",
-        "level": "INFO"
       }
     },
     "loggers": {
       "": {
-        "handlers": ["console", "file"],
+        "handlers": ["console"],
+        "level": "INFO",
+        "propagate": false
+      },
+      "gunicorn": {
+        "handlers": ["console"],
         "level": "INFO",
         "propagate": false
       },
       "uvicorn": {
-        "handlers": ["console", "file"],
+        "handlers": ["console"],
         "level": "INFO",
         "propagate": false
       },
       "uvicorn.error": {
-        "handlers": ["console", "file"],
+        "handlers": ["console"],
         "level": "INFO",
         "propagate": false
       },
       "uvicorn.access": {
-        "handlers": ["console", "file"],
+        "handlers": ["console"],
         "level": "INFO",
         "propagate": false
       },
       "coffeebreak": {
-        "handlers": ["console", "file"],
+        "handlers": ["console"],
         "level": "DEBUG",
         "propagate": false
       }

@@ -43,7 +43,7 @@ def main():
         # Create a NotificationRequest
         notification = NotificationRequest(
             type="info",
-            recipient_type=RecipientType.SINGLE,
+            recipient_type=RecipientType.UNICAST,
             recipient=1,
             payload="This is a test message",
             priority=5

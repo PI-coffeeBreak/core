@@ -8,8 +8,10 @@ class PluginSettings(BaseModel):
 
 class PluginDetails(BaseModel):
     name: str
+    title: str
     has_register: bool
     has_unregister: bool
     has_router: bool
     is_loaded: bool
     description: str
+    config_page: bool
