@@ -1,3 +1,8 @@
+from schemas.activity_owner import \
+    ActivityOwnerBase as ActivityOwnerBase, \
+    ActivityOwnerCreate as ActivityOwnerCreate, \
+    ActivityOwner as ActivityOwner
+
 from schemas.activity import \
     ActivityTypeBase as ActivityTypeBase, \
     ActivityTypeCreate as ActivityTypeCreate, \
@@ -26,35 +31,40 @@ from schemas.event_info import \
     EventInfo as EventInfo, \
     EventInfoList as EventInfoList
 
+from schemas.favicon import \
+    Favicon as Favicon
+
+from schemas.manifest import \
+    Icon as Icon, \
+    InsertIcon as InsertIcon, \
+    Manifest as Manifest
+
 from schemas.media import \
     MediaBase as MediaBase, \
     MediaCreate as MediaCreate, \
     Media as Media, \
-    MediaList as MediaList
+    MediaResponse as MediaResponse
 
 from schemas.notification import \
-    NotificationBase as NotificationBase, \
-    NotificationCreate as NotificationCreate, \
-    Notification as Notification, \
-    NotificationList as NotificationList
+    RecipientType as RecipientType, \
+    NotificationRequest as NotificationRequest, \
+    NotificationResponse as NotificationResponse
 
 from schemas.plugin import \
-    PluginBase as PluginBase, \
-    PluginCreate as PluginCreate, \
-    Plugin as Plugin, \
-    PluginList as PluginList
+    PluginAction as PluginAction, \
+    PluginSettings as PluginSettings, \
+    PluginDetails as PluginDetails
 
 from schemas.plugin_setting import \
-    PluginSettingBase as PluginSettingBase, \
-    PluginSettingCreate as PluginSettingCreate, \
-    PluginSetting as PluginSetting, \
-    PluginSettingList as PluginSettingList
+    SelectorInput as SelectorInput, \
+    TextInput as TextInput, \
+    ToggleInput as ToggleInput, \
+    CheckboxInput as CheckboxInput, \
+    NumberInput as NumberInput, \
+    PluginSetting as PluginSetting
 
 from schemas.totp import \
-    TOTPBase as TOTPBase, \
-    TOTPCreate as TOTPCreate, \
-    TOTP as TOTP, \
-    TOTPList as TOTPList
+    OTPRequest as OTPRequest
 
 from schemas.user import \
     UserBase as UserBase, \
@@ -68,7 +78,6 @@ from schemas.ui.color_theme import \
     ColorTheme as ColorTheme
 
 from schemas.ui.menu import \
-    MenuOptionBase as MenuOptionBase, \
     MenuOptionCreate as MenuOptionCreate, \
     MenuOption as MenuOption, \
     Menu as Menu
@@ -82,18 +91,21 @@ from schemas.ui.page import \
     PagePatchSchema as PagePatchSchema, \
     DeletePageResponse as DeletePageResponse
 
+from schemas.ui.color import \
+    Color as Color
+
 __all__ = [
     "ActivityTypeBase", "ActivityTypeCreate", "ActivityType", "ActivityBase", "ActivityCreate", "ActivityUpdate", "Activity", "ActivityList",
     "ComponentBase", "ComponentCreate", "Component", "ComponentList",
     "EventBase", "EventCreate", "Event", "EventList",
     "EventInfoBase", "EventInfoCreate", "EventInfo", "EventInfoList",
-    "MediaBase", "MediaCreate", "Media", "MediaList",
-    "NotificationBase", "NotificationCreate", "Notification", "NotificationList",
-    "PluginBase", "PluginCreate", "Plugin", "PluginList",
-    "PluginSettingBase", "PluginSettingCreate", "PluginSetting", "PluginSettingList",
-    "TOTPBase", "TOTPCreate", "TOTP", "TOTPList",
+    "MediaBase", "MediaCreate", "Media", "MediaResponse",
+    "NotificationRequest", "NotificationResponse",
+    "PluginAction", "PluginSettings", "PluginDetails",
+    "SelectorInput", "TextInput", "ToggleInput", "CheckboxInput", "NumberInput", "PluginSetting",
+    "OTPRequest",
     "UserBase", "UserCreate", "User", "UserList",
-    "ColorThemeBase", "ColorThemeCreate", "ColorTheme",
-    "MenuOptionBase", "MenuOptionCreate", "MenuOption", "Menu",
+    "ColorThemeBase", "ColorThemeCreate", "ColorTheme", "Color",
+    "MenuOptionCreate", "MenuOption", "Menu",
     "BaseComponent", "AddComponent", "RemoveComponentResponse", "BasePage", "Page", "PagePatchSchema", "DeletePageResponse"
 ]
