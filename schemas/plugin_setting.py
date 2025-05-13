@@ -50,57 +50,58 @@ class PluginSetting(BaseModel):
     description: str
     inputs: List[Union[SelectorInput, TextInput, CheckboxInput, ToggleInput, NumberInput]]
 
-# Example usage
-example_json = {
-    "title": "Plugin Name",
-    "description": "Plugin Description",
-    "inputs": [
-        {
-            "type": "selector",
-            "title": "title",
-            "description": "description",
-            "options": ["op1", "op2", "op3"]
-        },
-        {
-            "type": "text",
-            "title": "title"
-        },
-        {
-            "type": "shortText",
-            "title": "title"
-        },
-        {
-            "type": "checkbox",
-            "title": "title",
-            "description": "description",
-            "options": ["op1", "op2", "op3"],
-            "multiple": True,
-            "default": ["op1"],
-            "required": False
-        },
-        {
-            "type": "toggle",
-            "title": "title",
-            "description": "description",
-            "default": True,
-            "required": False
-        },
-        {
-            "type": "radio",
-            "title": "title",
-            "description": "description",
-            "options": ["op1", "op2", "op3"],
-            "default": "op1",
-            "required": False
-        },
-        {
-            "type": "composedText",
-            "title": "title",
-            "name": "name",
-            "description": "description"
-        }
-    ]
-}
+if __name__ == "__main__":
+    # Example usage
+    example_json = {
+        "title": "Plugin Name",
+        "description": "Plugin Description",
+        "inputs": [
+            {
+                "type": "selector",
+                "title": "title",
+                "description": "description",
+                "options": ["op1", "op2", "op3"]
+            },
+            {
+                "type": "text",
+                "title": "title"
+            },
+            {
+                "type": "shortText",
+                "title": "title"
+            },
+            {
+                "type": "checkbox",
+                "title": "title",
+                "description": "description",
+                "options": ["op1", "op2", "op3"],
+                "multiple": True,
+                "default": ["op1"],
+                "required": False
+            },
+            {
+                "type": "toggle",
+                "title": "title",
+                "description": "description",
+                "default": True,
+                "required": False
+            },
+            {
+                "type": "radio",
+                "title": "title",
+                "description": "description",
+                "options": ["op1", "op2", "op3"],
+                "default": "op1",
+                "required": False
+            },
+            {
+                "type": "composedText",
+                "title": "title",
+                "name": "name",
+                "description": "description"
+            }
+        ]
+    }
 
-plugin_setting = PluginSetting(**example_json)
-print(plugin_setting)
+    plugin_setting = PluginSetting(**example_json)
+    print(plugin_setting)
