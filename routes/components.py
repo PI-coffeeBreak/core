@@ -8,7 +8,7 @@ from schemas.components import ComponentInfo, ComponentsList
 router = APIRouter()
 
 
-@router.get("", response_model=ComponentsList)
+@router.get("/", response_model=ComponentsList)
 async def list_components():
     """
     List all registered UI components and their schemas

@@ -27,7 +27,7 @@ async def update_color_theme(color_theme: ColorTheme):
     
     # Update the manifest
     manifest = await manifest_service.get_manifest()
-    manifest['theme_color'] = color_theme.primary
-    manifest['background_color'] = color_theme.base_100
+    manifest.theme_color = color_theme.primary
+    manifest.background_color = color_theme.base_100
     await manifest_service.update_manifest(manifest)
     return updated_theme
