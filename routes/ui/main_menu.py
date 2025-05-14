@@ -18,7 +18,7 @@ async def get_main_menu():
     return main_menu
 
 
-@router.post("/option", response_model=Menu, dependencies=[Depends(check_role(["customization"]))])
+@router.post("/option/", response_model=Menu, dependencies=[Depends(check_role(["customization"]))])
 async def add_menu_option(option: MenuOptionCreate):
     return await create_menu_option(option.icon, option.label, option.href)
 
@@ -51,7 +51,7 @@ async def delete_menu_option(option_id: str):
     return await remove_menu_option(option_id)
 
 
-@router.put("/options", response_model=Menu, dependencies=[Depends(check_role(["customization"]))])
+@router.put("/options/", response_model=Menu, dependencies=[Depends(check_role(["customization"]))])
 async def update_menu_options(options: List[MenuOption]):
     main_menu = await main_menu_collection.find_one()
     if not main_menu:
@@ -62,8 +62,3 @@ async def update_menu_options(options: List[MenuOption]):
         raise HTTPException(
             status_code=500, detail="Failed to update menu options")
     return main_menu
-
-
-@router.delete("/option/by-href/{href}")
-async def delete_menu_option_by_href(href: str):
-    return await remove_menu_option_by_href(href)
