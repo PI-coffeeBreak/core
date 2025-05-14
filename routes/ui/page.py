@@ -73,7 +73,7 @@ async def list_pages():
         for page in pages if page.get("enabled", False) is True
     ]
 
-@router.get("/all", response_model=List[page_schema.PageResponse], summary="List all pages (enabled and disabled)")
+@router.get("/all/", response_model=List[page_schema.PageResponse], summary="List all pages (enabled and disabled)")
 async def list_all_pages():
     logger.debug("Listing all pages (enabled and disabled)")
     pages = await page_service.list_pages()
@@ -104,7 +104,7 @@ async def get_page(page_id: str):
     }
 
 
-@router.post("/{page_id}/components", response_model=page_schema.BaseComponentSchema, summary="Add a new component to the page")
+@router.post("/{page_id}/components/", response_model=page_schema.BaseComponentSchema, summary="Add a new component to the page")
 async def add_component(page_id: str, component: page_schema.AddBaseComponentSchema, user_info: dict = Depends(check_role(["customization"]))):
     component_dict = component.dict()
     component_dict['component_id'] = str(ObjectId())

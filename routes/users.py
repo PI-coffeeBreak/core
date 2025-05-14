@@ -55,7 +55,7 @@ async def create_user_endpoint(user_data: UserCreate):
         raise HTTPException(status_code=e.status_code, detail=str(e))
 
 
-@router.post("/batch", response_model=List[UserSchema], dependencies=[Depends(check_role(["manage_users"]))])
+@router.post("/batch/", response_model=List[UserSchema], dependencies=[Depends(check_role(["manage_users"]))])
 async def create_users_batch(users_data: List[UserCreate]):
     created_users = []
     for user_data in users_data:
@@ -67,7 +67,7 @@ async def create_users_batch(users_data: List[UserCreate]):
     return created_users
 
 
-@router.get("/roles", dependencies=[Depends(check_role(["manage_users"]))])
+@router.get("/roles/", dependencies=[Depends(check_role(["manage_users"]))])
 async def list_roles_endpoint():
     try:
         roles = await list_roles()
@@ -76,7 +76,7 @@ async def list_roles_endpoint():
         raise HTTPException(status_code=e.status_code, detail=str(e))
 
 
-@router.get("/roles/users", dependencies=[Depends(check_role(["manage_users"]))])
+@router.get("/roles/users/", dependencies=[Depends(check_role(["manage_users"]))])
 async def list_roles_endpoint():
     try:
         role_users = await list_role_users()
@@ -121,7 +121,7 @@ async def delete_user_endpoint(user_id: str):
         raise HTTPException(status_code=e.status_code, detail=str(e))
 
 
-@router.get("/permissions", response_model=Dict[str, List[str]], dependencies=[Depends(check_role(["manage_users"]))])
+@router.get("/permissions/", response_model=Dict[str, List[str]], dependencies=[Depends(check_role(["manage_users"]))])
 async def get_permissions():
     """
     Get all available permissions in the system, categorized as custom and native.

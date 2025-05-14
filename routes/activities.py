@@ -21,7 +21,7 @@ def create_activity(activity: ActivityCreate, db: Session = Depends(get_db), _: 
     except ActivityError as e:
         raise HTTPException(status_code=e.status_code, detail=e.message)
 
-@router.post("/batch", response_model=List[ActivitySchema])
+@router.post("/batch/", response_model=List[ActivitySchema])
 def create_activities(activities: List[ActivityCreate], db: Session = Depends(get_db), _: dict = Depends(check_role(["manage_activities"]))):
     try:
         return ActivityService(db).create_many(activities)
@@ -58,7 +58,7 @@ def remove_activity_image(activity_id: int, db: Session = Depends(get_db), user:
     except ActivityError as e:
         raise HTTPException(status_code=e.status_code, detail=e.message)
 
-@router.post("/{activity_id}/owners", response_model=ActivityOwnerSchema)
+@router.post("/{activity_id}/owners/", response_model=ActivityOwnerSchema)
 def add_activity_owner(
     activity_id: int,
     owner: ActivityOwnerCreate,
@@ -82,7 +82,7 @@ def remove_activity_owner(
     except ActivityError as e:
         raise HTTPException(status_code=e.status_code, detail=e.message)
 
-@router.get("/{activity_id}/owners", response_model=List[ActivityOwnerSchema])
+@router.get("/{activity_id}/owners/", response_model=List[ActivityOwnerSchema])
 def get_activity_owners(
     activity_id: int,
     db: Session = Depends(get_db)
