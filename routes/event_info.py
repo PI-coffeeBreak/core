@@ -69,6 +69,13 @@ async def create_or_update_event_admin(
 ):
     existing_event = db.query(EventInfoModel).first()
 
+
+    # Update manifest with event information
+    manifest = await manifest_service.get_manifest()
+    manifest.name = event.name
+    manifest.description = event.description
+    await manifest_service.update_manifest(manifest)
+
     if existing_event:
         for key, value in event.model_dump(exclude={"first_user_id"}).items():
             setattr(existing_event, key, value)
@@ -90,11 +97,6 @@ async def create_or_update_event_admin(
     db.commit()
     db.refresh(db_event)
 
-    # Update manifest with event information
-    manifest = await manifest_service.get_manifest()
-    manifest.name = event.name
-    manifest.description = event.description
-    await manifest_service.update_manifest(manifest)
     return EventInfo.model_validate(db_event)
 
 
