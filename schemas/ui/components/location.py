@@ -17,8 +17,3 @@ class Location(BaseComponentSchema):
     address: str = Field(... , description="Address of the location")
     venueTitle: str = Field(... , description="Title of the venue")
     zoom: int = Field(default=12, description="Zoom level for the map")
-    className: str = Field(
-        default="",
-        description="CSS classes to be applied",
-        optional=True
-    )
