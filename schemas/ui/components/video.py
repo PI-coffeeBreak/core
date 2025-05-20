@@ -14,21 +14,9 @@ class Video(BaseComponentSchema):
         loop (bool): Whether the video should loop
         muted (bool): Whether the video should be muted
         poster (str): The URL of the poster image for the video
-        title (str): The title of the video
-        description (str): A description of the video content
         allowFullscreen (bool): Whether to allow fullscreen mode
         startAt (int): Time in seconds to start the video at
     """
-    title: str = Field(
-        default="",
-        description="The title of the video",
-        optional=True
-    )
-    description: str = Field(
-        default="",
-        description="A description of the video content",
-        optional=True
-    )
     src: str | Media = Field(
         ..., description="The source URL of the video (can be an external URL or a Media reference)")
     autoplay: bool = Field(default=False, description="Whether the video should autoplay", optional=True)

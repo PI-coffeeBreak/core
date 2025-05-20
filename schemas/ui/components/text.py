@@ -12,7 +12,7 @@ class Text(BaseComponentSchema):
     """
     text: str = Field(..., description="The text content to be displayed")
     color: Color = Field(
-        default=Color.PRIMARY_CONTENT,
+        default=Color.BASE_CONTENT,
         description="Text color of the text",
         enum=[color.value for color in Color],
         optional=True
