@@ -13,7 +13,27 @@ from services.manifest import ManifestService
 router = APIRouter()
 manifest_service = ManifestService()
 
-@router.get("/event", response_model=EventInfo, summary="Get current event information")
+@router.get("/event", 
+    response_model=EventInfo, 
+    summary="Get current event information",
+    description="Retrieves the current event details including name, description, and image information.",
+    responses={
+        200: {
+            "description": "Successfully retrieved event information",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "name": "Coffee Break 2024",
+                        "description": "Annual coffee break event",
+                        "image_id": "123e4567-e89b-12d3-a456-426614174000"
+                    }
+                }
+            }
+        },
+        404: {
+            "description": "No event information found"
+        }
+    })
 async def get_event(request: Request, db: Session = Depends(get_db)):
     event = db.query(EventInfoModel).first()
     if not event:
@@ -23,7 +43,33 @@ async def get_event(request: Request, db: Session = Depends(get_db)):
     return EventInfo.model_validate(event)
 
 
-@router.post("/event", response_model=EventInfo, status_code=status.HTTP_201_CREATED, summary="Create event information (public, one-time)")
+@router.post("/event", 
+    response_model=EventInfo, 
+    status_code=status.HTTP_201_CREATED, 
+    summary="Create event information (public, one-time)",
+    description="""Creates the initial event information. This endpoint can only be used once.
+    It will:
+    - Create the event record
+    - Set up image storage
+    - Assign the cb-organizer role to the first user
+    - Update the PWA manifest with event details""",
+    responses={
+        201: {
+            "description": "Event information created successfully",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "name": "Coffee Break 2025",
+                        "description": "Annual coffee break event",
+                        "image_id": "123e4567-e89b-12d3-a456-426614174000"
+                    }
+                }
+            }
+        },
+        400: {
+            "description": "Event information already exists"
+        }
+    })
 async def create_event(
     event: EventInfoCreateFirstUser,
     request: Request,
@@ -61,7 +107,32 @@ async def create_event(
     return EventInfo.model_validate(db_event)
 
 
-@router.put("/event", response_model=EventInfo, status_code=status.HTTP_201_CREATED, summary="Create or update event information (admin only)")
+@router.put("/event", 
+    response_model=EventInfo, 
+    status_code=status.HTTP_201_CREATED, 
+    summary="Create or update event information (admin only)",
+    description="""Creates or updates event information. Requires manage_event role.
+    This endpoint will:
+    - Create or update the event record
+    - Update the PWA manifest with new event details
+    - Handle image storage if needed""",
+    responses={
+        201: {
+            "description": "Event information created or updated successfully",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "name": "Coffee Break 2024",
+                        "description": "Annual coffee break event",
+                        "image_id": "123e4567-e89b-12d3-a456-426614174000"
+                    }
+                }
+            }
+        },
+        403: {
+            "description": "Not authorized. Requires manage_event role"
+        }
+    })
 async def create_or_update_event_admin(
     request: Request,
     event: EventInfoCreate,
@@ -101,14 +172,21 @@ async def create_or_update_event_admin(
     return EventInfo.model_validate(db_event)
 
 
-@router.get("/event/image", summary="Get current event image")
+@router.get("/event/image", 
+    summary="Get current event image",
+    description="Returns a redirect to the current event's image. If no event or image exists, returns a 404 error.",
+    responses={
+        307: {
+            "description": "Redirect to the event image URL"
+        },
+        404: {
+            "description": "No event image found"
+        }
+    })
 async def get_event_image(
     request: Request,
     db: Session = Depends(get_db)
 ):
-    """
-    Get the current event image.
-    """
     event = db.query(EventInfoModel).first()
     if not event or not event.image_id:
         raise HTTPException(
