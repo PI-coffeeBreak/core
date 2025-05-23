@@ -7,6 +7,10 @@ from pydantic import BaseModel
 
 
 class ManifestService:
+    """
+    Service for managing the PWA manifest.
+    The manifest is stored in MongoDB and contains information about the PWA such as name, description, icons, etc.
+    """
     _instance = None
 
     def __new__(cls):
@@ -18,15 +22,37 @@ class ManifestService:
         self.manifest_collection = db['manifest']
 
     async def get_manifest(self) -> Manifest:
-        manifest = await self.manifest_collection.find_one({"name": "coffeeBreak"})
+        """
+        Retrieves the current PWA manifest from the database.
+        
+        Returns:
+            Manifest: The current manifest object
+            
+        Raises:
+            ManifestNotFoundError: If no manifest exists in the database
+        """
+        manifest = await self.manifest_collection.find_one({"id": "/app?source=pwa"})
         if not manifest:
             raise ManifestNotFoundError()
         return Manifest(**manifest)
 
     async def update_manifest(self, new_manifest: Manifest) -> Manifest:
+        """
+        Updates the PWA manifest in the database.
+        If no manifest exists, creates a new one.
+        
+        Args:
+            new_manifest (Manifest): The new manifest object to store
+            
+        Returns:
+            Manifest: The updated manifest object
+            
+        Raises:
+            ManifestUpdateError: If the update operation fails
+        """
         try:
             result = await self.manifest_collection.update_one(
-                {"name": new_manifest.name}, {"$set": new_manifest.model_dump()}
+                {"id": new_manifest.id}, {"$set": new_manifest.model_dump()}
             )
             if result.matched_count == 0:
                 # Create new manifest
@@ -37,8 +63,17 @@ class ManifestService:
 
     async def insert_icon(self, icon: Icon) -> Icon:
         """
-        Insert a new icon into the manifest.
-        Replace if there is already an icon with the same size.
+        Inserts a new icon into the manifest.
+        If an icon with the same size and purpose already exists, it will be replaced.
+        
+        Args:
+            icon (Icon): The icon object to insert
+            
+        Returns:
+            Icon: The inserted icon object
+            
+        Raises:
+            ManifestInsertIconError: If the icon insertion fails
         """
         try:
             manifest = await self.get_manifest()
