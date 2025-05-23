@@ -54,6 +54,7 @@ async def create_event(
     # Update manifest with event information
     manifest = await manifest_service.get_manifest()
     manifest.name = event.name
+    manifest.short_name = event.name
     manifest.description = event.description
     await manifest_service.update_manifest(manifest)
 
@@ -69,10 +70,10 @@ async def create_or_update_event_admin(
 ):
     existing_event = db.query(EventInfoModel).first()
 
-
     # Update manifest with event information
     manifest = await manifest_service.get_manifest()
     manifest.name = event.name
+    manifest.short_name = event.name
     manifest.description = event.description
     await manifest_service.update_manifest(manifest)
 
