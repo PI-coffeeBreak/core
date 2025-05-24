@@ -32,11 +32,6 @@ class Button(BaseComponentSchema):
         default="",
         description="The URL to be called when the button is clicked"
     )
-    className: str = Field(
-        default="",
-        description="CSS classes to be applied",
-        optional=True
-    )
     backgroundColor: str = Field(
         default=Color.PRIMARY.value,
         description="Background color of the button",
