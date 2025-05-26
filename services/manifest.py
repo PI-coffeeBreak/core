@@ -31,7 +31,9 @@ class ManifestService:
         Raises:
             ManifestNotFoundError: If no manifest exists in the database
         """
-        manifest = await self.manifest_collection.find_one({"id": "/app?source=pwa"})
+        manifest = await self.manifest_collection.find_one(
+            sort=[("_id", -1)]
+        )
         if not manifest:
             raise ManifestNotFoundError()
         return Manifest(**manifest)
