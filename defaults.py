@@ -1,9 +1,14 @@
 import logging
 
+import os
+from sqlalchemy.orm import Session
 from dependencies.mongodb import db
+from dependencies.database import get_db
+
 from schemas.ui.menu import Menu, MenuOption
 from schemas.ui.color_theme import ColorTheme
 from schemas.ui.page import Page
+
 from schemas.ui.components.title import Title
 from schemas.ui.components.image import Image
 from schemas.ui.components.text import Text
@@ -11,21 +16,24 @@ from schemas.ui.components.button import Button
 from schemas.ui.components.location import Location
 from schemas.ui.components.video import Video
 from schemas.ui.components.activities import Activities
-from schemas.manifest import Manifest
+from schemas.ui.components.next_activity import NextActivity
+from schemas.ui.components.carousel import Carousel
+from schemas.ui.components.spacing import Spacing
+
 from services.manifest import ManifestService
 from services.component_registry import ComponentRegistry
 from services.media import MediaService
-from repository.media import LocalMediaRepo
-from models.media import Media
-from exceptions.manifest import ManifestNotFoundError
-from schemas.favicon import Favicon
 from services.favicon import FaviconService
-from exceptions.favicon import FaviconNotFoundError
-from constants.mime_types import MimeTypes
 
-import os
-from sqlalchemy.orm import Session
-from dependencies.database import get_db
+from exceptions.favicon import FaviconNotFoundError
+from exceptions.manifest import ManifestNotFoundError
+
+from schemas.favicon import Favicon
+from schemas.manifest import Manifest
+
+from constants.mime_types import MimeTypes
+from models.media import Media
+from repository.media import LocalMediaRepo
 
 logger = logging.getLogger("coffeebreak")
 
@@ -139,6 +147,12 @@ async def register_default_components():
     logger.debug("Registered Video component")
     component_registry.register_component(Activities)
     logger.debug("Registered Activities component")
+    component_registry.register_component(NextActivity)
+    logger.debug("Registered NextActivity component")
+    component_registry.register_component(Carousel)
+    logger.debug("Registered Carousel component")
+    component_registry.register_component(Spacing)
+    logger.debug("Registered Spacing component")
 
 async def create_default_manifest():
     """Creates the default manifest if it doesn't exist"""
