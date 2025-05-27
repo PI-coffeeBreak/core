@@ -146,16 +146,15 @@ async def create_default_manifest():
     try:
         _manifest = await manifest_service.get_manifest()
     except ManifestNotFoundError:
-        # Criar manifesto padrão se não existir
         default_manifest = Manifest(
-            id="/app?source=pwa",
+            id="/?source=pwa",
             name="coffeeBreak",
             short_name="coffeeBreak",
             description="An app to manage events",
             display="standalone",
             orientation="portrait",
-            scope="/app",
-            start_url="/app?source=pwa",
+            scope="/",
+            start_url="/?source=pwa",
             background_color="#ffffff",
             theme_color="#ffffff",
             icons=[
