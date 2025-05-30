@@ -23,7 +23,7 @@ class Activity(Base):
     # optional content for diferent types of activity
     topic = Column(String, nullable=True)
     facilitator = Column(String, nullable=True)
-    type_id = Column(Integer, ForeignKey("activity_types.id"), nullable=False)
+    type_id = Column(Integer, ForeignKey("activity_types.id"), nullable=True)
 
     type = relationship("ActivityType", back_populates="activities")
     owners = relationship("ActivityOwner", back_populates="activity")

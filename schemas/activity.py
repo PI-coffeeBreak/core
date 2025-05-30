@@ -22,7 +22,7 @@ class ActivityBase(BaseModel):
     image: Optional[str] = None
     date: Optional[datetime] = None
     duration: Optional[int] = None
-    type_id: int
+    type_id: Optional[int] = None
 
     topic: Optional[str] = None
     facilitator: Optional[str] = None
